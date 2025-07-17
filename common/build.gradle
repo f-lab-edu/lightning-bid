@@ -1,0 +1,4 @@
+// buildSrc/src/main/groovy/springboot-library-conventions.gradle
+plugins {
+    id 'jpa-conventions'
+}

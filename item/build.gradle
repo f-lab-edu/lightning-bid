@@ -1,0 +1,8 @@
+plugins {
+    id 'query-dsl-conventions'
+}
+
+dependencies {
+    implementation project(':common')
+    implementation project(':user')
+}
