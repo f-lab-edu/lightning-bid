@@ -1,3 +1,4 @@
-dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+// buildSrc/src/main/groovy/springboot-library-conventions.gradle
+plugins {
+    id 'jpa-conventions'
 }

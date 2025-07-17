@@ -1,0 +1,12 @@
+plugins {
+    id 'spring-boot-common-conventions'
+}
+
+dependencies {
+    runtimeOnly 'org.postgresql:postgresql'
+
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // 데이터 유효성 검증(Validation)을 위한 의존성
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+}
