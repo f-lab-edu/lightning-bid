@@ -6,7 +6,9 @@ dependencies {
     // 데이터 유효성 검증(Validation)을 위한 의존성
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
-    // implementation project(':common')
+    implementation 'org.springframework.data:spring-data-commons'
+
+    implementation project(':common')
     implementation project(':user')
     implementation project(':item')
     implementation project(':auction')
