@@ -8,6 +8,9 @@ dependencies {
     // 실행 중인 애플리케이션의 상태(헬스 체크, 메모리 사용량, 환경 변수 등)를 모니터링할 수 있는 여러 엔드포인트를 제공
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
+    // Spring Security 테스트를 위한 의존성 추가
+    testImplementation 'org.springframework.security:spring-security-test'
+
     // 코드가 변경되었을 때 애플리케이션을 자동으로 재시작해주거나, 정적 파일을 새로고침 없이 바로 반영해주는 등 개발 편의성을 극대화해주는 도구
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 }
