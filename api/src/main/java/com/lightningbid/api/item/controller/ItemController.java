@@ -112,9 +112,7 @@ public class ItemController {
                         .build())
                 .build();
 
-        return ResponseEntity.status(HttpStatus.OK).body(
-                CommonResponseDto.success(HttpStatus.OK.value(), "상품 목록 조회가 완료되었습니다.", itemList)
-        );
+        return ResponseEntity.ok(CommonResponseDto.success(HttpStatus.OK.value(), "상품 목록 조회가 완료되었습니다.", itemList));
     }
 
     @GetMapping("/{itemId}")
@@ -155,9 +153,7 @@ public class ItemController {
                 .createdAt(LocalDateTime.of(2025, 7, 10, 21, 30, 0))
                 .build();
 
-        return ResponseEntity.status(HttpStatus.OK).body(
-                CommonResponseDto.success(HttpStatus.OK.value(), "상품 상세 정보 조회가 완료되었습니다.", itemDetail)
-        );
+        return ResponseEntity.ok(CommonResponseDto.success(HttpStatus.OK.value(), "상품 상세 정보 조회가 완료되었습니다.", itemDetail));
     }
 
     @PatchMapping("/{itemId}")
@@ -198,9 +194,7 @@ public class ItemController {
                 .createdAt(LocalDateTime.of(2025, 7, 10, 21, 30, 0))
                 .build();
 
-        return ResponseEntity.status(HttpStatus.OK).body(
-                CommonResponseDto.success(HttpStatus.OK.value(), "상품 정보가 성공적으로 수정되었습니다.", itemResponseDto)
-        );
+        return ResponseEntity.ok(CommonResponseDto.success(HttpStatus.OK.value(), "상품 정보가 성공적으로 수정되었습니다.", itemResponseDto));
     }
 
     @DeleteMapping("/{itemId}")

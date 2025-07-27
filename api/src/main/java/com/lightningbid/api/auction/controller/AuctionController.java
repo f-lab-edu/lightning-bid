@@ -30,6 +30,7 @@ public class AuctionController {
                 .currentBid(requestDto.getPrice())
                 .bidCount(1)
                 .build();
+
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 CommonResponseDto.success(HttpStatus.CREATED.value(), "입찰이 성공적으로 등록되었습니다.", responseDto)
         );
@@ -66,9 +67,8 @@ public class AuctionController {
         );
 
         BidsResponse responseDto = BidsResponse.builder().bids(bidList).build();
-        return ResponseEntity.status(HttpStatus.OK).body(
-                CommonResponseDto.success(HttpStatus.OK.value(), "상품의 전체 입찰 목록 조회가 완료되었습니다.", responseDto)
-        );
+
+        return ResponseEntity.ok(CommonResponseDto.success(HttpStatus.OK.value(), "상품의 전체 입찰 목록 조회가 완료되었습니다.", responseDto));
     }
 
     @DeleteMapping("/{itemId}/bids/{bidId}")
@@ -76,9 +76,7 @@ public class AuctionController {
             @PathVariable long itemId,
             @PathVariable long bidId) {
 
-        return ResponseEntity.status(HttpStatus.OK).body(
-                CommonResponseDto.success(HttpStatus.OK.value(), "입찰 취소 처리되었습니다.")
-        );
+        return ResponseEntity.ok(CommonResponseDto.success(HttpStatus.OK.value(), "입찰 취소 처리되었습니다."));
     }
 
     @PostMapping("/{itemId}/deals/confirm")
@@ -91,9 +89,8 @@ public class AuctionController {
                         .sellerConfirmationStatus(ConfirmationStatus.PENDING.getCode())
                         .buyerConfirmationStatus(ConfirmationStatus.CONFIRMED.getCode())
                         .build();
-        return ResponseEntity.status(HttpStatus.OK).body(
-                CommonResponseDto.success(HttpStatus.OK.value(), "거래 확정 처리되었습니다.", responseDto)
-        );
+
+        return ResponseEntity.ok(CommonResponseDto.success(HttpStatus.OK.value(), "거래 확정 처리되었습니다.", responseDto));
     }
 
     @PatchMapping("/{itemId}/deals/cancel")
@@ -103,9 +100,8 @@ public class AuctionController {
                 .itemId(itemId)
                 .status(ItemStatus.FAILED.getCode())
                 .build();
-        return ResponseEntity.status(HttpStatus.OK).body(
-                CommonResponseDto.success(HttpStatus.OK.value(), "거래 불발 처리가 완료되었습니다.", responseDto)
-        );
+
+        return ResponseEntity.ok(CommonResponseDto.success(HttpStatus.OK.value(), "거래 불발 처리가 완료되었습니다.", responseDto));
     }
 
     @PatchMapping("/{itemId}/cancel")
@@ -115,8 +111,7 @@ public class AuctionController {
                 .itemId(itemId)
                 .status(ItemStatus.CANCELED.getCode())
                 .build();
-        return ResponseEntity.status(HttpStatus.OK).body(
-                CommonResponseDto.success(HttpStatus.OK.value(), "경매가 취소되었습니다.", responseDto)
-        );
+
+        return ResponseEntity.ok(CommonResponseDto.success(HttpStatus.OK.value(), "경매가 취소되었습니다.", responseDto));
     }
 }
