@@ -22,6 +22,8 @@ public class ItemResponseDto {
 
     private String categoryName;
 
+    private List<String> imageIds;
+
     private List<String> imageUrls;
 
     private String status;
@@ -30,16 +32,11 @@ public class ItemResponseDto {
 
     private String location;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime createdAt;
-
     private Integer viewCount;
 
     private Integer likeCount;
 
     private Integer chatCount;
-
-    private Integer bidCount;
 
     private Boolean isLiked;
 
@@ -48,5 +45,8 @@ public class ItemResponseDto {
     private UserDto seller;
 
     private AuctionDto auction;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime createdAt;
 }
 

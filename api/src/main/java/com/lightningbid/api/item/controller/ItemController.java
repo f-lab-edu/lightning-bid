@@ -26,25 +26,26 @@ public class ItemController {
     public ResponseEntity<CommonResponseDto<ItemCreateResponseDto>> createItem(@RequestBody @Valid ItemCreateRequestDto requestDto) {
 
         ItemCreateResponseDto productResponseDto = ItemCreateResponseDto.builder()
+                .itemId(123L)
+                .title(requestDto.getTitle())
+                .description(requestDto.getDescription())
+                .categoryId(requestDto.getCategoryId())
+                .categoryName("카테고리 명")
+                .status(ItemStatus.ACTIVE.getCode())
+                .isDirectTrade(requestDto.getIsDirectTrade())
                 .imageIds(requestDto.getImageIds())
                 .imageUrls(List.of("https://...", "https://..."))
+                .location(requestDto.getLocation())
+                .viewCount(0)
+                .startPrice(requestDto.getStartPrice())
+                .bidUnit(50000)
                 .seller(UserDto.builder()
                         .userId(1L)
                         .nickname("판매자_닉네임")
                         .profileImageUrl("https://...")
                         .build()) // 여기에 생성해둔 객체를 넣어줍니다.
-                .title(requestDto.getTitle())
-                .description(requestDto.getDescription())
-                .categoryId(requestDto.getCategoryId())
-                .isDirectTrade(requestDto.getIsDirectTrade())
-                .location(requestDto.getLocation())
-                .startPrice(requestDto.getStartPrice())
-//                .currentBid(requestDto.getStartPrice())
-                .bidUnit(50000)
                 .auctionEndTime(requestDto.getAuctionEndTime())
-                .status(ItemStatus.ACTIVE.getCode())
                 .createdAt(LocalDateTime.of(2025, 7, 10, 21, 30, 0))
-                .viewCount(0)
                 .build();
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
@@ -125,6 +126,7 @@ public class ItemController {
                 .description("게이밍 마우스 설명입니다. 상태 아주 좋고 거의 새것과 다름없습니다. 급하게 팔아야 해서 가격 내립니다!")
                 .categoryId(101L)
                 .categoryName("디지털기기")
+                .imageIds(List.of("1", "2", "3"))
                 .imageUrls(List.of(
                         "https://...",
                         "https://...",
@@ -133,7 +135,6 @@ public class ItemController {
                 .status(ItemStatus.ACTIVE.getCode())
                 .isDirectTrade(true)
                 .location("서울시 강남구")
-                .createdAt(LocalDateTime.of(2025, 7, 10, 21, 30, 0))
                 .viewCount(152)
                 .likeCount(12)
                 .chatCount(3)
@@ -148,8 +149,10 @@ public class ItemController {
                         .startPrice(30000)
                         .currentBid(35000)
                         .bidUnit(1000)
+                        .bidCount(0)
                         .auctionEndTime(LocalDateTime.of(2025, 7, 20, 21, 30, 0))
                         .build())
+                .createdAt(LocalDateTime.of(2025, 7, 10, 21, 30, 0))
                 .build();
 
         return ResponseEntity.status(HttpStatus.OK).body(
@@ -166,6 +169,7 @@ public class ItemController {
                 .description(requestDto.getDescription())
                 .categoryId(requestDto.getCategoryId())
                 .categoryName("디지털기기")
+                .imageIds(List.of("1", "2", "3"))
                 .imageUrls(List.of(
                         "https://...",
                         "https://...",
@@ -174,7 +178,6 @@ public class ItemController {
                 .status(ItemStatus.ACTIVE.getCode())
                 .isDirectTrade(requestDto.getIsDirectTrade())
                 .location(requestDto.getLocation())
-                .createdAt(LocalDateTime.of(2025, 7, 10, 21, 30, 0))
                 .viewCount(152)
                 .likeCount(12)
                 .chatCount(3)
@@ -189,8 +192,10 @@ public class ItemController {
                         .startPrice(requestDto.getStartPrice())
                         .currentBid(35000)
                         .bidUnit(1000)
+                        .bidCount(0)
                         .auctionEndTime(requestDto.getAuctionEndTime())
                         .build())
+                .createdAt(LocalDateTime.of(2025, 7, 10, 21, 30, 0))
                 .build();
 
         return ResponseEntity.status(HttpStatus.OK).body(
