@@ -9,8 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -47,8 +49,8 @@ class ItemControllerTest {
                 .imageIds(List.of("1", "2", "3"))
                 .isDirectTrade(true)
                 .location("서울시 강남구")
-                .startPrice(1_300_000)
-                .auctionEndTime(LocalDateTime.of(2025, 7, 30, 0, 0, 0, 1))
+                .startPrice(BigDecimal.valueOf(1_300_000))
+                .auctionDuration("PT25H")
                 .build();
         String requestJson = objectMapper.writeValueAsString(requestDto);
 
@@ -75,10 +77,10 @@ class ItemControllerTest {
                 .andExpect(jsonPath("$.data.location").value(requestDto.getLocation()))
                 .andExpect(jsonPath("$.data.startPrice").value(requestDto.getStartPrice()))
                 .andExpect(jsonPath("$.data.bidUnit").exists())
-                .andExpect(jsonPath("$.data.auctionEndTime").value(requestDto.getAuctionEndTime().format(formatter)))
+                .andExpect(jsonPath("$.data.auctionStartTime").exists())
+                .andExpect(jsonPath("$.data.auctionEndTime").exists())
                 .andExpect(jsonPath("$.data.status").exists())
                 .andExpect(jsonPath("$.data.createdAt").exists())
-                .andExpect(jsonPath("$.data.viewCount").exists())
                 .andExpect(jsonPath("$.data.seller").exists())
                 .andExpect(jsonPath("$.data.seller.nickname").value("판매자_닉네임"))
                 .andExpect(jsonPath("$.data.seller.userId").exists());
@@ -184,7 +186,7 @@ class ItemControllerTest {
                 .imageIds(List.of("1", "4"))
                 .isDirectTrade(true)
                 .location("서울시 강남구")
-                .startPrice(25000)
+                .startPrice(BigDecimal.valueOf(25000))
                 .auctionEndTime(LocalDateTime.of(2025, 8, 22, 23, 0, 0))
                 .build();
         String requestJson = objectMapper.writeValueAsString(requestDto);

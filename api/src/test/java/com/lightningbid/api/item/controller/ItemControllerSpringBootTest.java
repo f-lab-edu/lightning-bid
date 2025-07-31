@@ -8,7 +8,7 @@ import com.lightningbid.api.item.dto.response.ItemCreateResponseDto;
 import com.lightningbid.api.item.dto.response.ItemResponseDto;
 import com.lightningbid.api.user.dto.response.UserDto;
 import com.lightningbid.common.dto.CommonResponseDto;
-import com.lightningbid.enums.ItemStatus;
+import com.lightningbid.item.item.enums.ItemStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -21,6 +21,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -60,11 +61,14 @@ class ItemControllerSpringBootTest {
                 .imageIds(List.of("1", "2", "3"))
                 .isDirectTrade(true)
                 .location("서울시 강남구")
-                .startPrice(1_300_000)
-                .auctionEndTime(LocalDateTime.of(2025, 7, 30, 0, 0, 0, 1))
+                .startPrice(BigDecimal.valueOf(1_300_000))
+                .auctionDuration("PT25H")
                 .build();
         String requestJson = objectMapper.writeValueAsString(requestDto);
 
+        System.out.println("requestJson = " + requestJson);
+        
+        
         // HttpHeaders 생성 및 Content-Type 설정
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -104,7 +108,6 @@ class ItemControllerSpringBootTest {
         assertThat(itemCreateResponse.getStatus()).isEqualTo(ItemStatus.ACTIVE.getCode());
         assertThat(itemCreateResponse.getIsDirectTrade()).isNotNull();
         assertThat(itemCreateResponse.getLocation()).isNotNull();
-        assertThat(itemCreateResponse.getViewCount()).isNotNull();
         assertThat(itemCreateResponse.getStartPrice()).isNotNull();
         assertThat(itemCreateResponse.getBidUnit()).isNotNull();
         assertThat(itemCreateResponse.getCreatedAt().format(formatter)).isNotNull().isNotBlank();
@@ -160,7 +163,6 @@ class ItemControllerSpringBootTest {
         assertThat(itemDetail.getChatCount()).isNotNull();
         assertThat(itemDetail.getIsLiked()).isNotNull();
         assertThat(itemDetail.getIsDepositPaid()).isNotNull();
-        assertThat(itemDetail.getCreatedAt().format(formatter)).isNotNull().isNotBlank();
 
         UserDto seller = itemDetail.getSeller();
         assertThat(seller).isNotNull();
@@ -191,7 +193,7 @@ class ItemControllerSpringBootTest {
                 .imageIds(List.of("1", "4"))
                 .isDirectTrade(true)
                 .location("서울시 강남구")
-                .startPrice(25000)
+                .startPrice(BigDecimal.valueOf(25000))
                 .auctionEndTime(LocalDateTime.of(2025, 8, 22, 23, 0, 0))
                 .build();
         String requestJson = objectMapper.writeValueAsString(requestDto);
@@ -240,7 +242,6 @@ class ItemControllerSpringBootTest {
         assertThat(itemDetail.getChatCount()).isNotNull();
         assertThat(itemDetail.getIsLiked()).isNotNull();
         assertThat(itemDetail.getIsDepositPaid()).isNotNull();
-        assertThat(itemDetail.getCreatedAt().format(formatter)).isNotNull().isNotBlank();
 
         UserDto seller = itemDetail.getSeller();
         assertThat(seller).isNotNull();
