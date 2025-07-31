@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.lightningbid.api.user.dto.response.UserDto;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -33,16 +34,19 @@ public class ItemCreateResponseDto {
 
     private String location;
 
-    private Integer viewCount;
+    private BigDecimal startPrice;
 
-    private Integer startPrice;
+    private BigDecimal instantSalePrice;
 
-    private Integer bidUnit;
+    private BigDecimal bidUnit;
 
     private UserDto seller;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdAt;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime auctionStartTime;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime auctionEndTime;

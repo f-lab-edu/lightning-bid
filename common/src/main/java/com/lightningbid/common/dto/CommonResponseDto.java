@@ -18,7 +18,7 @@ public class CommonResponseDto<T> {
         return new CommonResponseDto<>(status, message, null);
     }
 
-    public static CommonResponseDto<Void> fail(Integer status, String message) {
+    public static CommonResponseDto<Void> error(Integer status, String message) {
         return new CommonResponseDto<>(status, message, null);
     }
 }
