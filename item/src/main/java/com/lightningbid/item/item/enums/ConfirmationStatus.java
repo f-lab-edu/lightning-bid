@@ -1,4 +1,4 @@
-package com.lightningbid.enums;
+package com.lightningbid.item.item.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
