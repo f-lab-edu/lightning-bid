@@ -6,46 +6,93 @@ import com.lightningbid.api.item.dto.request.ItemsRequestDto;
 import com.lightningbid.api.item.dto.response.*;
 import com.lightningbid.api.user.dto.response.UserDto;
 import com.lightningbid.common.dto.CommonResponseDto;
-import com.lightningbid.enums.ItemStatus;
+import com.lightningbid.auction.domain.Auction;
+import com.lightningbid.item.item.domain.Item;
+import com.lightningbid.item.item.enums.ItemStatus;
+import com.lightningbid.auction.service.AuctionService;
+import com.lightningbid.item.category.service.CategoryService;
+import com.lightningbid.item.itemlike.service.ItemLikeService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/items")
+@RequiredArgsConstructor
 public class ItemController {
+
+    private final CategoryService categoryService;
+
+    private final AuctionService auctionService;
+
+    private final ItemLikeService itemLikeService;
 
     @PostMapping
     public ResponseEntity<CommonResponseDto<ItemCreateResponseDto>> createItem(@RequestBody @Valid ItemCreateRequestDto requestDto) {
 
-        ItemCreateResponseDto productResponseDto = ItemCreateResponseDto.builder()
-                .itemId(123L)
+        // 이미지 처리 해야됨
+
+        Item item = Item.builder()
                 .title(requestDto.getTitle())
+                .userId(1L)
                 .description(requestDto.getDescription())
                 .categoryId(requestDto.getCategoryId())
-                .categoryName("카테고리 명")
-                .status(ItemStatus.ACTIVE.getCode())
+                .categoryName(categoryService.findCategoryNameById(requestDto.getCategoryId()))
                 .isDirectTrade(requestDto.getIsDirectTrade())
+                .location(requestDto.getLocation())
+                .build();
+
+        Auction resultAuction = auctionService.createAuction(Auction.builder()
+                        .startPrice(requestDto.getStartPrice())
+                        .currentBid(requestDto.getStartPrice())
+                        .instantSalePrice(requestDto.getInstantSalePrice())
+                        .item(item)
+                        .build(),
+                requestDto.getAuctionDuration()
+        );
+
+        /*----------------------------------------*/
+        // TODO: repository 개발 후 수정
+//        Item resultItem = resultAuction.getItem();
+        item.setViewCount(0);
+        item.setId(1L);
+        item.setStatus(ItemStatus.ACTIVE);
+        item.setCreatedAt(LocalDateTime.now());
+        Item resultItem = item;
+        /*----------------------------------------*/
+
+        ItemCreateResponseDto productResponseDto = ItemCreateResponseDto.builder()
+                .itemId(resultItem.getId())
+                .title(resultItem.getTitle())
+                .description(resultItem.getDescription())
+                .categoryId(resultItem.getCategoryId())
+                .categoryName(resultItem.getCategoryName())
+                .status(resultItem.getStatus().getCode())
+                .isDirectTrade(resultItem.getIsDirectTrade())
+
                 .imageIds(requestDto.getImageIds())
                 .imageUrls(List.of("https://...", "https://..."))
-                .location(requestDto.getLocation())
-                .viewCount(0)
-                .startPrice(requestDto.getStartPrice())
-                .bidUnit(50000)
+
+                .location(resultItem.getLocation())
+                .startPrice(resultAuction.getStartPrice())
+                .bidUnit(resultAuction.getBidUnit())
                 .seller(UserDto.builder()
                         .userId(1L)
                         .nickname("판매자_닉네임")
                         .profileImageUrl("https://...")
-                        .build()) // 여기에 생성해둔 객체를 넣어줍니다.
-                .auctionEndTime(requestDto.getAuctionEndTime())
-                .createdAt(LocalDateTime.of(2025, 7, 10, 21, 30, 0))
+                        .build())
+                .auctionStartTime(resultAuction.getAuctionStartTime())
+                .auctionEndTime(resultAuction.getAuctionEndTime())
+                .createdAt(resultItem.getCreatedAt())
                 .build();
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
@@ -118,39 +165,48 @@ public class ItemController {
     @GetMapping("/{itemId}")
     public ResponseEntity<CommonResponseDto<ItemResponseDto>> getItemDetail(@PathVariable Long itemId) {
 
+        Auction auction = auctionService.findAuctionByItemId(itemId);
+        Item item = auction.getItem();
+
+        boolean isLiked = itemLikeService.checkUserLikeStatus(1L, itemId);
+        String categoryName = categoryService.findCategoryNameById(1L);
+
+        // TODO 보증금 납부 여부 확인 로직 추가
+        boolean isDepositPaid = false;
+
         ItemResponseDto itemDetail = ItemResponseDto.builder()
-                .itemId(itemId)
-                .title("게이밍 마우스 (가격 인하)")
-                .description("게이밍 마우스 설명입니다. 상태 아주 좋고 거의 새것과 다름없습니다. 급하게 팔아야 해서 가격 내립니다!")
-                .categoryId(101L)
-                .categoryName("디지털기기")
+                .itemId(item.getId())
+                .title(item.getTitle())
+                .description(item.getDescription())
+                .categoryId(item.getCategoryId())
+                .categoryName(categoryName)
                 .imageIds(List.of("1", "2", "3"))
                 .imageUrls(List.of(
                         "https://...",
                         "https://...",
                         "https://..."
                 ))
-                .status(ItemStatus.ACTIVE.getCode())
-                .isDirectTrade(true)
-                .location("서울시 강남구")
-                .viewCount(152)
-                .likeCount(12)
-                .chatCount(3)
-                .isLiked(true)
-                .isDepositPaid(false)
+                .status(item.getStatus().getCode())
+                .isDirectTrade(item.getIsDirectTrade())
+                .location(item.getLocation())
+                .viewCount(item.getViewCount() + 1)
+                .likeCount(item.getLikeCount())
+                .chatCount(item.getChatCount())
+                .isLiked(isLiked)
+                .isDepositPaid(isDepositPaid)
                 .seller(UserDto.builder()
                         .userId(789L)
                         .nickname("판매자_닉네임")
                         .profileImageUrl("https://...")
                         .build())
                 .auction(AuctionDto.builder()
-                        .startPrice(30000)
-                        .currentBid(35000)
-                        .bidUnit(1000)
-                        .bidCount(0)
-                        .auctionEndTime(LocalDateTime.of(2025, 7, 20, 21, 30, 0))
+                        .startPrice(auction.getStartPrice())
+                        .currentBid(auction.getCurrentBid())
+                        .bidUnit(auction.getBidUnit())
+                        .bidCount(auction.getBidCount())
+                        .auctionStartTime(auction.getAuctionStartTime())
+                        .auctionEndTime(auction.getAuctionEndTime())
                         .build())
-                .createdAt(LocalDateTime.of(2025, 7, 10, 21, 30, 0))
                 .build();
 
         return ResponseEntity.ok(CommonResponseDto.success(HttpStatus.OK.value(), "상품 상세 정보 조회가 완료되었습니다.", itemDetail));
@@ -186,12 +242,12 @@ public class ItemController {
                         .build())
                 .auction(AuctionDto.builder()
                         .startPrice(requestDto.getStartPrice())
-                        .currentBid(35000)
-                        .bidUnit(1000)
+                        .currentBid(BigDecimal.valueOf(35000))
+                        .bidUnit(BigDecimal.valueOf(1000))
                         .bidCount(0)
+//                        .auctionStartTime(requestDto.getAuctionEndTime())
                         .auctionEndTime(requestDto.getAuctionEndTime())
                         .build())
-                .createdAt(LocalDateTime.of(2025, 7, 10, 21, 30, 0))
                 .build();
 
         return ResponseEntity.ok(CommonResponseDto.success(HttpStatus.OK.value(), "상품 정보가 성공적으로 수정되었습니다.", itemResponseDto));
