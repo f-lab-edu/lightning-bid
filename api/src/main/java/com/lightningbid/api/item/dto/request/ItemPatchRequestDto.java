@@ -2,6 +2,7 @@ package com.lightningbid.api.item.dto.request;
 
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -17,6 +18,6 @@ public class ItemPatchRequestDto {
     private List<String> imageIds;
     private Boolean isDirectTrade;
     private String location;
-    private Integer startPrice;
+    private BigDecimal startPrice;
     private LocalDateTime auctionEndTime;
 }
