@@ -13,11 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 public class ItemCreateResponseDto {
 
-    private List<String> imageIds;
-
-    private List<String> imageUrls;
-
-    private UserDto seller;
+    private Long itemId;
 
     private String title;
 
@@ -25,23 +21,29 @@ public class ItemCreateResponseDto {
 
     private Long categoryId;
 
+    private String categoryName;
+
+    private List<String> imageIds;
+
+    private List<String> imageUrls;
+
+    private String status;
+
     private Boolean isDirectTrade;
 
     private String location;
 
-    private Integer startPrice;
+    private Integer viewCount;
 
-    //    private Integer currentBid;
+    private Integer startPrice;
 
     private Integer bidUnit;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime auctionEndTime;
-
-    private String status;
+    private UserDto seller;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdAt;
 
-    private int viewCount;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime auctionEndTime;
 }

@@ -3,7 +3,6 @@ package com.lightningbid.api.item.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lightningbid.api.item.dto.request.ItemCreateRequestDto;
 import com.lightningbid.api.item.dto.request.ItemPatchRequestDto;
-import com.lightningbid.enums.ItemStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,7 +74,6 @@ class ItemControllerTest {
                 .andExpect(jsonPath("$.data.isDirectTrade").value(requestDto.getIsDirectTrade()))
                 .andExpect(jsonPath("$.data.location").value(requestDto.getLocation()))
                 .andExpect(jsonPath("$.data.startPrice").value(requestDto.getStartPrice()))
-//                .andExpect(jsonPath("$.data.currentBid").value(requestDto.getStartPrice())) // 현재가는 시작가와 동일한지
                 .andExpect(jsonPath("$.data.bidUnit").exists())
                 .andExpect(jsonPath("$.data.auctionEndTime").value(requestDto.getAuctionEndTime().format(formatter)))
                 .andExpect(jsonPath("$.data.status").exists())
@@ -149,6 +147,7 @@ class ItemControllerTest {
                 .andExpect(jsonPath("$.data.description").exists())
                 .andExpect(jsonPath("$.data.categoryId").exists())
                 .andExpect(jsonPath("$.data.categoryName").exists())
+                .andExpect(jsonPath("$.data.imageIds").exists())
                 .andExpect(jsonPath("$.data.imageUrls").exists())
                 .andExpect(jsonPath("$.data.status").exists())
                 .andExpect(jsonPath("$.data.isDirectTrade").exists())
@@ -169,6 +168,7 @@ class ItemControllerTest {
                 .andExpect(jsonPath("$.data.auction.startPrice").exists())
                 .andExpect(jsonPath("$.data.auction.currentBid").exists())
                 .andExpect(jsonPath("$.data.auction.bidUnit").exists())
+                .andExpect(jsonPath("$.data.auction.bidCount").exists())
                 .andExpect(jsonPath("$.data.auction.auctionEndTime").exists());
     }
 
@@ -231,9 +231,9 @@ class ItemControllerTest {
     }
 
     @Test
+    @DisplayName("상품을 삭제 합니다.")
     void deleteItem() throws Exception {
 
-        // when: API 호출
         Long itemId = 12345L;
         mockMvc.perform(delete("/api/v1/items/{itemId}", itemId)
                         .with(csrf())
