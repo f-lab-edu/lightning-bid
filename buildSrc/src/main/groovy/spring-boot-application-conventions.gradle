@@ -8,6 +8,9 @@ dependencies {
     // 실행 중인 애플리케이션의 상태(헬스 체크, 메모리 사용량, 환경 변수 등)를 모니터링할 수 있는 여러 엔드포인트를 제공
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
+    // 데이터 유효성 검증(Validation)을 위한 의존성
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
     // Spring Security 테스트를 위한 의존성 추가
     testImplementation 'org.springframework.security:spring-security-test'
 
