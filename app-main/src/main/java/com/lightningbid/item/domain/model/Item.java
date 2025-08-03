@@ -1,42 +1,56 @@
 package com.lightningbid.item.domain.model;
 
+import com.lightningbid.auction.domain.model.Auction;
+import com.lightningbid.common.entity.BaseEntity;
 import com.lightningbid.item.domain.enums.ItemStatus;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
-
-import java.time.LocalDateTime;
+import org.hibernate.annotations.ColumnDefault;
 
 @Setter
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Item {
-    Long id;
+@Entity
+public class Item extends BaseEntity {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "item_id")
+    private Long id;
 
-    Long userId;
+    private Long userId;
 
-    String title;
+    private String title;
 
-    String description;
+    private String description;
 
-    Long categoryId;
+    @Column(nullable = false)
+    private Long categoryId;
 
-    String categoryName;
+    @Column(nullable = false)
+    private String categoryName;
 
     @Enumerated(EnumType.STRING)
-    ItemStatus status;
+    private ItemStatus status;
 
-    Boolean isDirectTrade;
+    @Column(nullable = false)
+    private Boolean isDirectTrade;
 
-    String location;
+    private String location;
 
-    Integer viewCount;
+    @ColumnDefault("0")
+    @Column(nullable = false)
+    private int viewCount;
 
-    Integer likeCount;
+    @ColumnDefault("0")
+    @Column(nullable = false)
+    private int likeCount;
 
-    Integer chatCount;
+    @ColumnDefault("0")
+    @Column(nullable = false)
+    private int chatCount;
 
-    LocalDateTime createdAt;
+    @OneToOne(mappedBy = "item", fetch = FetchType.LAZY)
+    private Auction auction;
 }

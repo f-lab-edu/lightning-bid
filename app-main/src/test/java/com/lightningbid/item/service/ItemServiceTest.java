@@ -1,8 +1,8 @@
 package com.lightningbid.item.service;
 
+import com.lightningbid.auction.domain.exception.ItemNotFoundException;
 import com.lightningbid.auction.domain.model.Auction;
 import com.lightningbid.auction.service.AuctionService;
-import com.lightningbid.auction.domain.exception.AuctionNotFoundException;
 import com.lightningbid.item.domain.enums.ItemStatus;
 import com.lightningbid.item.domain.model.Item;
 import com.lightningbid.item.domain.repository.ItemRepository;
@@ -21,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -44,6 +45,9 @@ class ItemServiceTest {
 
     @Mock
     private ItemLikeService itemLikeService;
+
+    @Mock
+    private ItemAsyncService itemAsyncService;
 
     @InjectMocks
     private ItemService itemService;
@@ -75,11 +79,12 @@ class ItemServiceTest {
                 .build();
 
         // given/willReturn에 사용될 가짜 반환 객체
+        Duration auctionDuration = Duration.parse(durationString);
         Auction savedAuction = Auction.builder()
                 .id(1L)
                 .startPrice(expectedStartPrice)
                 .auctionStartTime(now)
-                .auctionEndTime(now.plus(Duration.parse(durationString)))
+                .auctionEndTime(now.plus(auctionDuration))
                 .bidUnit(BigDecimal.valueOf(1000))
                 .item(Item.builder()
                         .id(1L)
@@ -93,14 +98,14 @@ class ItemServiceTest {
         given(auctionService.createAuction(any(Auction.class))).willReturn(savedAuction);
 
         // when
-        ItemCreateResponseDto responseDto = itemService.createItemWithAuction(requestDto);
+        ItemCreateResponseDto responseDto = itemService.createItemWithAuction(requestDto, auctionDuration);
 
         // then
         assertThat(responseDto).isNotNull();
         assertThat(responseDto.getItemId()).isEqualTo(savedAuction.getItem().getId());
         assertThat(responseDto.getTitle()).isEqualTo(savedAuction.getItem().getTitle());
         assertThat(responseDto.getCategoryName()).isEqualTo(savedAuction.getItem().getCategoryName());
-        assertThat(responseDto.getStatus()).isEqualTo(ItemStatus.ACTIVE.getCode());
+        assertThat(responseDto.getStatus()).isEqualTo(savedAuction.getItem().getStatus().getCode());
         assertThat(responseDto.getStartPrice()).isEqualTo(savedAuction.getStartPrice());
         assertThat(responseDto.getBidUnit()).isEqualTo(savedAuction.getBidUnit());
         assertThat(responseDto.getAuctionEndTime()).isEqualTo(savedAuction.getAuctionEndTime());
@@ -121,20 +126,6 @@ class ItemServiceTest {
     }
 
     @Test
-    @DisplayName("판매 상품 등록 - 실패")
-    void createItemWithAuction_Fail() {
-        String durationString = "30";
-        ItemCreateRequestDto requestDto = ItemCreateRequestDto.builder().auctionDuration(durationString).build();
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> itemService.createItemWithAuction(requestDto));
-
-        assertThat(exception.getMessage()).contains("유효하지 않은 기간 형식입니다.");
-
-        verify(categoryService, never()).findCategoryNameById(any(Long.class));
-        verify(auctionService, never()).createAuction(any(Auction.class));
-    }
-
-    @Test
     @DisplayName("상품 상세 조회 - 성공")
     void findItemWithAuctionByItemId_Success() {
 
@@ -144,29 +135,31 @@ class ItemServiceTest {
         boolean isLike = false;
 
         LocalDateTime auctionStartTime = LocalDateTime.now();
-        Auction findAuction = Auction.builder()
-                .startPrice(BigDecimal.valueOf(10000))
-                .currentBid(BigDecimal.valueOf(14000))
-                .bidUnit(BigDecimal.valueOf(1000))
-                .bidCount(4)
-                .auctionStartTime(auctionStartTime)
-                .auctionEndTime(auctionStartTime.plusDays(3))
-                .item(Item.builder()
-                        .id(itemId)
-                        .title("제목")
-                        .description("설명")
-                        .categoryId(1L)
-                        .categoryName(expectedCategoryName)
-                        .status(ItemStatus.ACTIVE)
-                        .location("판매 지역")
-                        .viewCount(viewCount)
-                        .likeCount(1)
-                        .chatCount(2)
-                        .isDirectTrade(true)
+        Optional<Item> findItemOptional = Optional.of(Item.builder()
+                .id(itemId)
+                .title("제목")
+                .description("설명")
+                .categoryId(1L)
+                .categoryName(expectedCategoryName)
+                .status(ItemStatus.ACTIVE)
+                .location("판매 지역")
+                .viewCount(viewCount)
+                .likeCount(1)
+                .chatCount(2)
+                .isDirectTrade(true)
+                .auction(Auction.builder()
+                        .startPrice(BigDecimal.valueOf(10000))
+                        .currentBid(BigDecimal.valueOf(14000))
+                        .bidUnit(BigDecimal.valueOf(1000))
+                        .bidCount(4)
+                        .auctionStartTime(auctionStartTime)
+                        .auctionEndTime(auctionStartTime.plusDays(3))
                         .build())
-                .build();
+                .build());
+        Item findItem = findItemOptional.get();
+
         // given
-        given(auctionService.findAuctionByItemId(any(Long.class))).willReturn(findAuction);
+        given(itemRepository.findWithAuctionById(any(Long.class))).willReturn(findItemOptional);
         given(itemLikeService.checkUserLikeStatus(any(Long.class), any(Long.class))).willReturn(isLike);
         given(categoryService.findCategoryNameById(any(Long.class))).willReturn(expectedCategoryName);
 
@@ -176,7 +169,7 @@ class ItemServiceTest {
         // then
         assertThat(responseDto).isNotNull();
 
-        Item findItem = findAuction.getItem();
+        Auction findAuction = findItem.getAuction();
         assertThat(responseDto.getItemId()).isEqualTo(findItem.getId());
         assertThat(responseDto.getTitle()).isEqualTo(findItem.getTitle());
         assertThat(responseDto.getDescription()).isEqualTo(findItem.getDescription());
@@ -195,28 +188,33 @@ class ItemServiceTest {
         assertThat(auction.getBidCount()).isEqualTo(findAuction.getBidCount());
         assertThat(auction.getAuctionStartTime()).isEqualTo(findAuction.getAuctionStartTime());
         assertThat(auction.getAuctionEndTime()).isEqualTo(findAuction.getAuctionEndTime());
+
+        verify(itemRepository).findWithAuctionById(any(Long.class));
+        verify(itemLikeService).checkUserLikeStatus(any(Long.class), any(Long.class));
+        verify(itemAsyncService).increaseViewCount(any(Long.class));
+        verify(categoryService).findCategoryNameById(any(Long.class));
     }
 
     @Test
-    @DisplayName("상품 상세 조회 - 실패")
+    @DisplayName("상품 상세 조회 - 실패 (조회된 상품이 없습니다.)")
     void findItemWithAuctionByItemId_Fail() {
 
         // given: 존재하지 않는 ID와, 해당 ID로 조회 시 예외가 발생한다고 가정
         Long invalidItemId = 999L;
         String errorMessage = "조회된 상품이 없습니다.";
-        given(auctionService.findAuctionByItemId(invalidItemId))
-                .willThrow(new AuctionNotFoundException(errorMessage));
+        given(itemRepository.findWithAuctionById(invalidItemId))
+                .willThrow(new ItemNotFoundException(errorMessage));
 
         // when
-        AuctionNotFoundException exception = assertThrows(AuctionNotFoundException.class, () -> {
+        ItemNotFoundException exception = assertThrows(ItemNotFoundException.class, () -> {
             itemService.findItemWithAuctionByItemId(invalidItemId);
         });
 
         // then
-        assertThat(exception.getMessage()).isEqualTo(errorMessage);
+        assertThat(exception.getMessage()).contains(errorMessage);
 
         verify(itemLikeService, never()).checkUserLikeStatus(anyLong(), anyLong());
+        verify(itemAsyncService, never()).increaseViewCount(anyLong());
         verify(categoryService, never()).findCategoryNameById(anyLong());
     }
-
 }

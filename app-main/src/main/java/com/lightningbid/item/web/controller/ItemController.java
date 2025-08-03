@@ -20,29 +20,32 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/items")
+@RequestMapping("/v1/items")
 @RequiredArgsConstructor
 public class ItemController {
-
-    private final CategoryService categoryService;
-
-    private final AuctionService auctionService;
-
-    private final ItemLikeService itemLikeService;
 
     private final ItemService itemService;
 
     @PostMapping
     public ResponseEntity<CommonResponseDto<ItemCreateResponseDto>> createItem(@RequestBody @Valid ItemCreateRequestDto requestDto) {
-        // 이미지 처리 해야됨
+
+        Duration auctionDuration;
+        try {
+            auctionDuration = Duration.parse(requestDto.getAuctionDuration());
+        } catch (DateTimeParseException e) {
+            // ISO 8601 형식이 아니면 예외 발생
+            throw new IllegalArgumentException("유효하지 않은 기간 형식입니다. (입력: " + requestDto.getAuctionDuration() + ")");
+        }
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                CommonResponseDto.success(HttpStatus.CREATED.value(), "상품이 성공적으로 등록되었습니다.", itemService.createItemWithAuction(requestDto))
+                CommonResponseDto.success(HttpStatus.CREATED.value(), "상품이 성공적으로 등록되었습니다.", itemService.createItemWithAuction(requestDto, auctionDuration))
         );
     }
 

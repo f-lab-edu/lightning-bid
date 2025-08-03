@@ -1,6 +1,5 @@
 package com.lightningbid.auction.service;
 
-import com.lightningbid.auction.domain.exception.AuctionNotFoundException;
 import com.lightningbid.auction.domain.model.Auction;
 import com.lightningbid.auction.domain.repository.AuctionRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,11 +17,14 @@ public class AuctionService {
 
     private final AuctionRepository auctionRepository;
 
+    private final BidUnitService bidUnitService;
+
+    @Transactional
     public Auction createAuction(Auction auction) {
 
         // 입찰 단위 설정
-        int bidUnit = auctionRepository.findBidUnit(auction.getStartPrice());
-        auction.setBidUnit(BigDecimal.valueOf(bidUnit));
+        BigDecimal bidUnit = bidUnitService.getBidUnit(auction.getStartPrice());
+        auction.applyBidUnit(bidUnit);
 
         validateAuction(auction);
 
@@ -47,16 +49,9 @@ public class AuctionService {
             if (startPrice.compareTo(instantSalePrice) > 0)
                 throw new IllegalArgumentException("즉시 판매 가격은 경매 시작가보다 높아야 합니다.");
 
-            if (instantSalePrice.subtract(startPrice).compareTo(auction.getBidUnit()) < 0)
+            if (instantSalePrice.compareTo(startPrice) != 0 &&
+                    instantSalePrice.subtract(startPrice).compareTo(auction.getBidUnit()) < 0)
                 throw new IllegalArgumentException("즉시 판매 가격은 입찰 단위보다 높아야 합니다. 입찰 단위: " + auction.getBidUnit());
         }
-
-    }
-
-    @Transactional(readOnly = true)
-    public Auction findAuctionByItemId(Long itemId) {
-
-        return auctionRepository.findWithItemByItemId(itemId)
-                .orElseThrow(() -> new AuctionNotFoundException("조회된 상품이 없습니다."));
     }
 }

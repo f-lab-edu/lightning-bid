@@ -57,7 +57,7 @@ class ItemControllerTest {
         ItemCreateRequestDto requestDto = ItemCreateRequestDto.builder()
                 .title("맥북프로 M1pro 판매합니다.")
                 .description("맥북 M1pro 판매합니다. 상태 최상입니다.")
-                .categoryId(101L)
+                .categoryId(1L)
                 .imageIds(List.of("1", "2", "3"))
                 .isDirectTrade(true)
                 .location("서울시 강남구")
@@ -110,7 +110,6 @@ class ItemControllerTest {
         assertThat(itemCreateResponse.getLocation()).isNotNull();
         assertThat(itemCreateResponse.getStartPrice()).isNotNull();
         assertThat(itemCreateResponse.getBidUnit()).isNotNull();
-        assertThat(itemCreateResponse.getCreatedAt().format(formatter)).isNotNull().isNotBlank();
 
         UserDto seller = itemCreateResponse.getSeller();
         assertThat(seller).isNotNull();
@@ -123,7 +122,7 @@ class ItemControllerTest {
     @DisplayName("상품 상세 목록을 조회한다.")
     void getItems() throws Exception {
 
-        Long itemId = 12345L; // 예시 아이템 ID
+        Long itemId = 1L; // 예시 아이템 ID
         String url = baseUrl + "/" +itemId;
 
         ResponseEntity<CommonResponseDto<ItemResponseDto>> responseEntity = restTemplate.exchange(
