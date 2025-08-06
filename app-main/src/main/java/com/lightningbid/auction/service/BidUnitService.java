@@ -11,9 +11,9 @@ import java.math.BigDecimal;
 @RequiredArgsConstructor
 public class BidUnitService {
 
-    private final BidUnitRepository bidUnitRepository;
-
     private static final BigDecimal DEFAULT_BID_UNIT = BigDecimal.valueOf(10_000);
+
+    private final BidUnitRepository bidUnitRepository;
 
     public BigDecimal getBidUnit(BigDecimal price) {
 

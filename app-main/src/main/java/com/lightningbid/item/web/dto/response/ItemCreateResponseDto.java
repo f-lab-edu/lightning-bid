@@ -1,7 +1,7 @@
 package com.lightningbid.item.web.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.lightningbid.user.dto.response.UserDto;
+import com.lightningbid.user.web.dto.response.UserResponseDto;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -40,7 +40,7 @@ public class ItemCreateResponseDto {
 
     private BigDecimal bidUnit;
 
-    private UserDto seller;
+    private UserResponseDto seller;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdAt;
