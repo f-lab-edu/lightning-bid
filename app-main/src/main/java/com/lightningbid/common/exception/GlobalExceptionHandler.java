@@ -1,6 +1,6 @@
 package com.lightningbid.common.exception;
 
-import com.lightningbid.auction.domain.exception.AuctionNotFoundException;
+import com.lightningbid.auction.domain.exception.ItemNotFoundException;
 import com.lightningbid.common.dto.CommonResponseDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -24,8 +24,8 @@ public class GlobalExceptionHandler {
         );
     }
 
-    @ExceptionHandler(AuctionNotFoundException.class)
-    public ResponseEntity<CommonResponseDto<Void>> handleResourceNotFoundException(AuctionNotFoundException e) {
+    @ExceptionHandler(ItemNotFoundException.class)
+    public ResponseEntity<CommonResponseDto<Void>> handleResourceNotFoundException(ItemNotFoundException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                 CommonResponseDto.error(HttpStatus.NOT_FOUND.value(), e.getMessage())
         );

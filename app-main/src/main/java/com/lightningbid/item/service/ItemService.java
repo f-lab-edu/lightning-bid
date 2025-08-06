@@ -1,5 +1,6 @@
 package com.lightningbid.item.service;
 
+import com.lightningbid.auction.domain.exception.ItemNotFoundException;
 import com.lightningbid.auction.domain.model.Auction;
 import com.lightningbid.auction.service.AuctionService;
 import com.lightningbid.item.domain.enums.ItemStatus;
@@ -11,20 +12,22 @@ import com.lightningbid.item.web.dto.response.ItemCreateResponseDto;
 import com.lightningbid.item.web.dto.response.ItemResponseDto;
 import com.lightningbid.user.dto.response.UserDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.Async;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ItemService {
 
     private final ItemRepository itemRepository;
+
+    private final ItemAsyncService itemAsyncService;
 
     private final CategoryService categoryService;
 
@@ -33,45 +36,32 @@ public class ItemService {
     private final ItemLikeService itemLikeService;
 
     @Transactional
-    public ItemCreateResponseDto createItemWithAuction(ItemCreateRequestDto itemCreateRequestDto) {
+    public ItemCreateResponseDto createItemWithAuction(ItemCreateRequestDto itemCreateRequestDto, Duration auctionDuration) {
+        // TODO 이미지 처리
 
-        Duration duration;
-        try {
-            duration = Duration.parse(itemCreateRequestDto.getAuctionDuration());
-        } catch (DateTimeParseException e) {
-            // ISO 8601 형식이 아니면 예외 발생
-            throw new IllegalArgumentException("유효하지 않은 기간 형식입니다. (입력: " + itemCreateRequestDto.getAuctionDuration() + ")");
-        }
+        LocalDateTime auctionStartTime;
 
         // DTO to Entity
-        Item item = Item.builder()
-                .title(itemCreateRequestDto.getTitle())
-                .userId(1L)
-                .description(itemCreateRequestDto.getDescription())
-                .categoryId(itemCreateRequestDto.getCategoryId())
-                .categoryName(categoryService.findCategoryNameById(itemCreateRequestDto.getCategoryId()))
-                .isDirectTrade(itemCreateRequestDto.getIsDirectTrade())
-                .location(itemCreateRequestDto.getLocation())
-                .build();
         Auction auction = Auction.builder()
                 .startPrice(itemCreateRequestDto.getStartPrice())
                 .currentBid(itemCreateRequestDto.getStartPrice())
                 .instantSalePrice(itemCreateRequestDto.getInstantSalePrice())
-                .auctionStartTime(LocalDateTime.now())
-                .auctionEndTime(LocalDateTime.now().plus(duration))
-                .item(item)
+                .auctionStartTime(auctionStartTime = LocalDateTime.now())
+                .auctionEndTime(auctionStartTime.plus(auctionDuration))
+                .item(Item.builder()
+                        .title(itemCreateRequestDto.getTitle())
+                        .userId(1L)
+                        .description(itemCreateRequestDto.getDescription())
+                        .categoryId(itemCreateRequestDto.getCategoryId())
+                        .categoryName(categoryService.findCategoryNameById(itemCreateRequestDto.getCategoryId()))
+                        .status(ItemStatus.ACTIVE)
+                        .isDirectTrade(itemCreateRequestDto.getIsDirectTrade())
+                        .location(itemCreateRequestDto.getLocation())
+                        .build())
                 .build();
 
         Auction resultAuction = auctionService.createAuction(auction);
-        /*----------------------------------------*/
-        // TODO: repository 개발 후 수정
-//        Item resultItem = resultAuction.getItem();
-        item.setViewCount(0);
-        item.setId(1L);
-        item.setStatus(ItemStatus.ACTIVE);
-        item.setCreatedAt(LocalDateTime.now());
-        Item resultItem = item;
-        /*----------------------------------------*/
+        Item resultItem = resultAuction.getItem();
 
         return ItemCreateResponseDto.builder()
                 .itemId(resultItem.getId())
@@ -88,7 +78,6 @@ public class ItemService {
                 .location(resultItem.getLocation())
                 .startPrice(resultAuction.getStartPrice())
                 .bidUnit(resultAuction.getBidUnit())
-//                .bidUnit(resultAuction.getStartPrice())
                 .seller(UserDto.builder()
                         .userId(1L)
                         .nickname("판매자_닉네임")
@@ -96,21 +85,24 @@ public class ItemService {
                         .build())
                 .auctionStartTime(resultAuction.getAuctionStartTime())
                 .auctionEndTime(resultAuction.getAuctionEndTime())
-                .createdAt(resultItem.getCreatedAt())
                 .build();
     }
 
     @Transactional(readOnly = true)
     public ItemResponseDto findItemWithAuctionByItemId(Long itemId) {
-        Auction findAuction = auctionService.findAuctionByItemId(itemId);
-        Item findItem = findAuction.getItem();
+
+        log.info("findItemWithAuctionByItemId() 현재 스레드: {}", Thread.currentThread().getName());
+
+        Item findItem = itemRepository.findWithAuctionById(itemId)
+                .orElseThrow(() -> new ItemNotFoundException("조회된 상품이 없습니다. (입력: " + itemId + ")" ));
+        Auction findAuction = findItem.getAuction();
 
         boolean isLiked = itemLikeService.checkUserLikeStatus(1L, itemId);
-        String categoryName = categoryService.findCategoryNameById(1L);
 
-        // 조회수는 증가만 시킨다.
-        increaseViewCount(itemId);
+        // 조회수는 별도의 스레드에서 증가만 시킨다.
+        itemAsyncService.increaseViewCount(itemId);
 
+        // TODO 보증급 납부여부 개발
         boolean isDepositPaid = false;
 
         return ItemResponseDto.builder()
@@ -118,7 +110,7 @@ public class ItemService {
                 .title(findItem.getTitle())
                 .description(findItem.getDescription())
                 .categoryId(findItem.getCategoryId())
-                .categoryName(categoryName)
+                .categoryName(categoryService.findCategoryNameById(findItem.getCategoryId()))
                 .imageIds(List.of("1", "2", "3"))
                 .imageUrls(List.of(
                         "https://...",
@@ -134,7 +126,7 @@ public class ItemService {
                 .isLiked(isLiked)
                 .isDepositPaid(isDepositPaid)
                 .seller(UserDto.builder()
-                        .userId(789L)
+                        .userId(1L)
                         .nickname("판매자_닉네임")
                         .profileImageUrl("https://...")
                         .build())
@@ -147,12 +139,5 @@ public class ItemService {
                         .auctionEndTime(findAuction.getAuctionEndTime())
                         .build())
                 .build();
-    }
-
-
-    @Async
-    @Transactional
-    public void increaseViewCount(Long itemId) {
-        itemRepository.increaseViewCount(itemId);
     }
 }

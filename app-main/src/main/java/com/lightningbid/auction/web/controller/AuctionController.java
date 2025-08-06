@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/items")
+@RequestMapping("/v1/items")
 public class AuctionController {
 
     @PostMapping("/{itemId}/bids")
