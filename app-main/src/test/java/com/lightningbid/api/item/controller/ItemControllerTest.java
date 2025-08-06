@@ -6,7 +6,7 @@ import com.lightningbid.item.web.dto.request.ItemPatchRequestDto;
 import com.lightningbid.item.web.dto.response.AuctionDto;
 import com.lightningbid.item.web.dto.response.ItemCreateResponseDto;
 import com.lightningbid.item.web.dto.response.ItemResponseDto;
-import com.lightningbid.user.dto.response.UserDto;
+import com.lightningbid.user.web.dto.response.UserResponseDto;
 import com.lightningbid.common.dto.CommonResponseDto;
 import com.lightningbid.item.domain.enums.ItemStatus;
 import lombok.extern.slf4j.Slf4j;
@@ -111,7 +111,7 @@ class ItemControllerTest {
         assertThat(itemCreateResponse.getStartPrice()).isNotNull();
         assertThat(itemCreateResponse.getBidUnit()).isNotNull();
 
-        UserDto seller = itemCreateResponse.getSeller();
+        UserResponseDto seller = itemCreateResponse.getSeller();
         assertThat(seller).isNotNull();
         assertThat(seller.getUserId()).isNotNull();
         assertThat(seller.getNickname()).isNotBlank();
@@ -163,7 +163,7 @@ class ItemControllerTest {
         assertThat(itemDetail.getIsLiked()).isNotNull();
         assertThat(itemDetail.getIsDepositPaid()).isNotNull();
 
-        UserDto seller = itemDetail.getSeller();
+        UserResponseDto seller = itemDetail.getSeller();
         assertThat(seller).isNotNull();
         assertThat(seller.getUserId()).isNotNull();
         assertThat(seller.getNickname()).isNotBlank();
@@ -242,7 +242,7 @@ class ItemControllerTest {
         assertThat(itemDetail.getIsLiked()).isNotNull();
         assertThat(itemDetail.getIsDepositPaid()).isNotNull();
 
-        UserDto seller = itemDetail.getSeller();
+        UserResponseDto seller = itemDetail.getSeller();
         assertThat(seller).isNotNull();
         assertThat(seller.getUserId()).isNotNull();
         assertThat(seller.getNickname()).isNotBlank();

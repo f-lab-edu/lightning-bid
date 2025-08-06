@@ -4,7 +4,7 @@ import com.lightningbid.payment.dto.request.DepositPreparationRequestDto;
 import com.lightningbid.payment.dto.request.PaymentCompletionRequestDto;
 import com.lightningbid.payment.dto.response.DepositPreparationResponseDto;
 import com.lightningbid.payment.dto.response.PaymentCompletionResponseDto;
-import com.lightningbid.user.dto.response.UserDto;
+import com.lightningbid.user.web.dto.response.UserResponseDto;
 import com.lightningbid.common.dto.CommonResponseDto;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -26,7 +26,7 @@ public class PaymentController {
                 .orderId("order_uuid_12345678")
                 .itemId(itemId)
                 .amount(requestDto.getAmount())
-                .bidder(UserDto.builder()
+                .bidder(UserResponseDto.builder()
                         .userId(1L)
                         .nickname("김토이")
                         .profileImageUrl("https://...")

@@ -2,7 +2,7 @@ package com.lightningbid.auction.web.controller;
 
 import com.lightningbid.auction.web.dto.request.BidCreateRequestDto;
 import com.lightningbid.auction.web.dto.response.*;
-import com.lightningbid.user.dto.response.UserDto;
+import com.lightningbid.user.web.dto.response.UserResponseDto;
 import com.lightningbid.common.dto.CommonResponseDto;
 import com.lightningbid.item.domain.enums.ConfirmationStatus;
 import com.lightningbid.item.domain.enums.ItemStatus;
@@ -43,7 +43,7 @@ public class AuctionController {
         bidList.add(
                 BidDetailDto.builder()
                         .bidId(500L)
-                        .bidder(UserDto.builder()
+                        .bidder(UserResponseDto.builder()
                                 .userId(800L)
                                 .nickname("입찰참가자A")
                                 .profileImageUrl("https://...")
@@ -56,7 +56,7 @@ public class AuctionController {
         bidList.add(
                 BidDetailDto.builder()
                         .bidId(501L)
-                        .bidder(UserDto.builder()
+                        .bidder(UserResponseDto.builder()
                                 .userId(801L)
                                 .nickname("입찰참가자B")
                                 .profileImageUrl("https://...")

@@ -10,7 +10,7 @@ import com.lightningbid.item.web.dto.request.ItemCreateRequestDto;
 import com.lightningbid.item.web.dto.response.AuctionDto;
 import com.lightningbid.item.web.dto.response.ItemCreateResponseDto;
 import com.lightningbid.item.web.dto.response.ItemResponseDto;
-import com.lightningbid.user.dto.response.UserDto;
+import com.lightningbid.user.web.dto.response.UserResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -78,7 +78,7 @@ public class ItemService {
                 .location(resultItem.getLocation())
                 .startPrice(resultAuction.getStartPrice())
                 .bidUnit(resultAuction.getBidUnit())
-                .seller(UserDto.builder()
+                .seller(UserResponseDto.builder()
                         .userId(1L)
                         .nickname("판매자_닉네임")
                         .profileImageUrl("https://...")
@@ -125,7 +125,7 @@ public class ItemService {
                 .chatCount(findItem.getChatCount())
                 .isLiked(isLiked)
                 .isDepositPaid(isDepositPaid)
-                .seller(UserDto.builder()
+                .seller(UserResponseDto.builder()
                         .userId(1L)
                         .nickname("판매자_닉네임")
                         .profileImageUrl("https://...")

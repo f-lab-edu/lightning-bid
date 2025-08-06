@@ -1,7 +1,7 @@
 package com.lightningbid.item.web.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.lightningbid.user.dto.response.UserDto;
+import com.lightningbid.user.web.dto.response.UserResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,7 +23,7 @@ public class ItemSummaryDto {
 
     private String location;
 
-    private UserDto seller;
+    private UserResponseDto seller;
 
     private int price; // 즉시 구매가 또는 경매 시작가
 

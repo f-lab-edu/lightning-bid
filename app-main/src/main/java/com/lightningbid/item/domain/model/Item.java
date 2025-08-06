@@ -4,11 +4,9 @@ import com.lightningbid.auction.domain.model.Auction;
 import com.lightningbid.common.entity.BaseEntity;
 import com.lightningbid.item.domain.enums.ItemStatus;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
-@Setter
 @Getter
 @Builder
 @AllArgsConstructor

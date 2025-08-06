@@ -1,6 +1,6 @@
 package com.lightningbid.payment.dto.response;
 
-import com.lightningbid.user.dto.response.UserDto;
+import com.lightningbid.user.web.dto.response.UserResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,5 +14,5 @@ public class DepositPreparationResponseDto {
     private String orderId;
     private Long itemId;
     private Integer amount;
-    private UserDto bidder;
+    private UserResponseDto bidder;
 }

@@ -1,7 +1,7 @@
 package com.lightningbid.auction.web.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.lightningbid.user.dto.response.UserDto;
+import com.lightningbid.user.web.dto.response.UserResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public class BidDetailDto {
     private Long bidId;
 
-    private UserDto bidder;
+    private UserResponseDto bidder;
 
     private Integer price;
 
