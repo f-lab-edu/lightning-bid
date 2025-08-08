@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 
 @Component
 public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
@@ -70,13 +71,15 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             String accessToken = jwtUtil.createAccessToken(id, username, role, nickname, profileUrl);
             String refreshToken = jwtUtil.createRefreshToken(username, role);
 
+            Duration tokenExp  = Duration.ofMillis(refreshTokenExpirationMillis);
+            Duration cookieExp = tokenExp.plusMinutes(10);
             ResponseCookie cookie = ResponseCookie
                     .from("refreshToken", refreshToken)
                     .path("/")
                     .httpOnly(true)
                     //.secure(true)
                     //.sameSite("None")
-                    .maxAge(refreshTokenExpirationMillis / 1000)
+                    .maxAge(cookieExp)
                     .build();
             response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 

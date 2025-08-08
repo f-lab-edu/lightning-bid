@@ -3,13 +3,9 @@ package com.lightningbid.auction.domain.exception;
 import com.lightningbid.common.enums.ErrorCode;
 import com.lightningbid.common.exception.BaseException;
 
-public class ItemNotFoundException extends BaseException {
+public class DepositRequiredException extends BaseException {
 
-    public ItemNotFoundException() {
+    public DepositRequiredException() {
         super(ErrorCode.DEPOSIT_REQUIRED);
-    }
-
-    public ItemNotFoundException(String message) {
-        super(message, ErrorCode.DEPOSIT_REQUIRED);
     }
 }
