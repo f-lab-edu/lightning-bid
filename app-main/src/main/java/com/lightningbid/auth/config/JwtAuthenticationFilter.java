@@ -97,10 +97,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String username = jwtUtil.getUsername(token);
         String profileUrl = jwtUtil.getProfileUrl(token);
         String nickname = jwtUtil.getNickname(token);
+        Long id = jwtUtil.getId(token);
 
         CustomOAuth2User customOAuth2User = CustomOAuth2User.builder()
                 .userDto(UserDto.builder()
                         .username(username)
+                        .id(id)
                         .profileUrl(profileUrl)
                         .nickname(nickname)
                         .role(Role.valueOf(roleStr))

@@ -12,6 +12,8 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
+
 @RestController
 @RequestMapping("/v1/auth")
 public class AuthController {
@@ -41,7 +43,7 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<CommonResponseDto<LoginSuccessResponseDto>> refreshAccessToken(
-            @CookieValue(name = "refreshToken")
+            @CookieValue(name = "refreshToken", required = false)
             String refreshToken) {
 
         TokensDto tokens = authService.refreshAccessToken(refreshToken);
@@ -49,12 +51,15 @@ public class AuthController {
     }
 
     private ResponseEntity<CommonResponseDto<LoginSuccessResponseDto>> getCommonResponseDtoResponseEntity(TokensDto tokens, String message) {
+
+        Duration tokenExp  = Duration.ofMillis(refreshTokenExpirationMillis);
+        Duration cookieExp = tokenExp.plusMinutes(10);
         ResponseCookie cookie = ResponseCookie.from("refreshToken", tokens.getRefreshToken())
                 .path("/")
                 .httpOnly(true)
                 //.secure(true)
                 //.sameSite("Strict")
-                .maxAge(refreshTokenExpirationMillis / 1000)
+                .maxAge(cookieExp)
                 .build();
 
         return ResponseEntity.ok()

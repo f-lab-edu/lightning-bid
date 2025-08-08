@@ -4,14 +4,16 @@ import com.lightningbid.common.entity.BaseEntity;
 import com.lightningbid.auth.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
 
-@ToString
+import java.time.LocalDateTime;
+
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class User extends BaseEntity {
+public class User {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -31,6 +33,15 @@ public class User extends BaseEntity {
     private String phone;
 
     private String profileUrl;
+
+    @CreatedDate
+    @Column(updatable = false, nullable = false)
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+    }
 
     @Enumerated(EnumType.STRING)
     private Role role;

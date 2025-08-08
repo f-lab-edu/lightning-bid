@@ -92,4 +92,8 @@ public class JwtUtil {
     public String getProfileUrl(String token) {
         return getClaims(token).get("profileUrl", String.class);
     }
+
+    public Long getId(String token) {
+        return getClaims(token).get("id", Long.class);
+    }
 }

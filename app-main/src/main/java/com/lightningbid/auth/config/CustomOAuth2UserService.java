@@ -46,13 +46,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         }
 
         String username = oAuth2Response.getProvider() + "_" + oAuth2Response.getProviderId();
-
+        
         Optional<User> findUserOptional = userRepository.findByUsername(username);
         User user;
 
         if (findUserOptional.isEmpty()) {
             // 사용자가 없는 경우 -> 새로 생성 (회원가입)
-            user = User.builder()
+            user = userRepository.save(User.builder()
                     .username(username)
                     .name(oAuth2Response.getName())
                     .email(oAuth2Response.getEmail())
@@ -60,8 +60,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     .provider(oAuth2Response.getProvider())
                     .providerId(oAuth2Response.getProviderId())
                     .role(Role.ROLE_GUEST)
-                    .build();
-            userRepository.save(user);
+                    .build());
 
         } else {
             // 사용자가 있는 경우 -> 정보 업데이트
