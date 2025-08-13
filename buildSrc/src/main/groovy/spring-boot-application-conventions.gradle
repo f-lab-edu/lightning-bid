@@ -11,8 +11,14 @@ dependencies {
     // 데이터 유효성 검증(Validation)을 위한 의존성
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
+    // Spring Security: 스프링 기반의 인증, 인가를 담당하는 핵심 프레임워크
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
     // Spring Security 테스트를 위한 의존성 추가
     testImplementation 'org.springframework.security:spring-security-test'
+
+    // OAuth2 Client: 네이버, 구글 등 OAuth2 기반 소셜 로그인을 구현하는 라이브러리
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
     // 코드가 변경되었을 때 애플리케이션을 자동으로 재시작해주거나, 정적 파일을 새로고침 없이 바로 반영해주는 등 개발 편의성을 극대화해주는 도구
     developmentOnly 'org.springframework.boot:spring-boot-devtools'

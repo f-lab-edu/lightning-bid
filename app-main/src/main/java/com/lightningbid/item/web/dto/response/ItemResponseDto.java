@@ -1,6 +1,6 @@
 package com.lightningbid.item.web.dto.response;
 
-import com.lightningbid.user.dto.response.UserDto;
+import com.lightningbid.user.web.dto.response.UserResponseDto;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -40,7 +40,7 @@ public class ItemResponseDto {
 
     private Boolean isDepositPaid;
 
-    private UserDto seller;
+    private UserResponseDto seller;
 
     private AuctionDto auction;
 }

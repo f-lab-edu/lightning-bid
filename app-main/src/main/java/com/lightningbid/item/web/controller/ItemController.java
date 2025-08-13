@@ -5,12 +5,9 @@ import com.lightningbid.item.web.dto.request.ItemCreateRequestDto;
 import com.lightningbid.item.web.dto.request.ItemPatchRequestDto;
 import com.lightningbid.item.web.dto.request.ItemsRequestDto;
 import com.lightningbid.item.web.dto.response.*;
-import com.lightningbid.user.dto.response.UserDto;
+import com.lightningbid.user.web.dto.response.UserResponseDto;
 import com.lightningbid.common.dto.CommonResponseDto;
 import com.lightningbid.item.domain.enums.ItemStatus;
-import com.lightningbid.auction.service.AuctionService;
-import com.lightningbid.item.service.CategoryService;
-import com.lightningbid.item.service.ItemLikeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -60,7 +57,7 @@ public class ItemController {
                 .title("M2 맥북 에어 미드나이트")
                 .thumbnailUrl("https://example.com/thumbnails/macbook_air.jpg")
                 .location("서울특별시 강남구")
-                .seller(UserDto.builder()
+                .seller(UserResponseDto.builder()
                         .userId(801L)
                         .nickname("강남판매자")
                         .profileImageUrl("https://...")
@@ -79,7 +76,7 @@ public class ItemController {
                 .title("LG 스탠바이미 TV 거의 새것")
                 .thumbnailUrl("https://...")
                 .location("서울특별시 서초구")
-                .seller(UserDto.builder()
+                .seller(UserResponseDto.builder()
                         .userId(801L)
                         .nickname("서초판매자")
                         .profileImageUrl("https://...")
@@ -146,7 +143,7 @@ public class ItemController {
                 .chatCount(3)
                 .isLiked(true)
                 .isDepositPaid(false)
-                .seller(UserDto.builder()
+                .seller(UserResponseDto.builder()
                         .userId(789L)
                         .nickname("판매자_닉네임")
                         .profileImageUrl("https://...")

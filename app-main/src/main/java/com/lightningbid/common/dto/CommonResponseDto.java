@@ -21,4 +21,8 @@ public class CommonResponseDto<T> {
     public static CommonResponseDto<Void> error(Integer status, String message) {
         return new CommonResponseDto<>(status, message, null);
     }
+
+    public static <T> CommonResponseDto<T> error(Integer status, String message, T errorCode) {
+        return new CommonResponseDto<> (status, message, errorCode);
+    }
 }

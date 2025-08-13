@@ -1,4 +1,4 @@
-package com.lightningbid.user.dto.response;
+package com.lightningbid.user.web.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDto {
+public class UserResponseDto {
     private Long userId;
     private String nickname;
     private String profileImageUrl;
