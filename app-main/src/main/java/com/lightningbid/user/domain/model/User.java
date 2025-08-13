@@ -1,9 +1,10 @@
 package com.lightningbid.user.domain.model;
 
-import com.lightningbid.common.entity.BaseEntity;
 import com.lightningbid.auth.enums.Role;
+import com.lightningbid.file.domain.model.File;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 @Entity
 public class User {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Long id;
 
     @Column(unique = true, nullable = false)
@@ -32,7 +34,11 @@ public class User {
 
     private String phone;
 
-    private String profileUrl;
+    private Long fileId;
+
+//    @OneToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "file_id")
+//    private File file;
 
     @CreatedDate
     @Column(updatable = false, nullable = false)
@@ -52,9 +58,9 @@ public class User {
         this.email = email;
     }
 
-    public void completeSignup(String nickname, String profileUrl) {
+    public void completeSignup(String nickname, Long fileId) {
         this.role = Role.ROLE_USER;
         this.nickname = nickname;
-//        this.profileUrl = profileUrl;
+        this.fileId = fileId;
     }
 }

@@ -15,7 +15,7 @@ public class BidUnitService {
 
     private final BidUnitRepository bidUnitRepository;
 
-    public BigDecimal getBidUnit(BigDecimal price) {
+    public BigDecimal getBidUnitByPrice(BigDecimal price) {
 
         return bidUnitRepository.findFirstByPriceGreaterThanEqualOrderByPriceAsc(price)
                 .map(BidUnit::getUnit)

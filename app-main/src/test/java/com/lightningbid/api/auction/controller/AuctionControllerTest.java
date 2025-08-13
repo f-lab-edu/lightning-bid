@@ -11,6 +11,8 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.math.BigDecimal;
+
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -32,7 +34,7 @@ class AuctionControllerTest {
     void createBid() throws Exception {
 
         // given: 요청 준비
-        BidCreateRequestDto requestDto = BidCreateRequestDto.builder().price(25000).build();
+        BidCreateRequestDto requestDto = BidCreateRequestDto.builder().price(BigDecimal.valueOf(25000)).build();
         String requestJson = objectMapper.writeValueAsString(requestDto);
         long itemId = 12345;
 

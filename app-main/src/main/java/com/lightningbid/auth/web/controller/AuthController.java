@@ -18,7 +18,6 @@ import java.time.Duration;
 @RequestMapping("/v1/auth")
 public class AuthController {
 
-    @Value("${jwt.refresh-token-expiration-millis}")
     private final Long refreshTokenExpirationMillis;
 
     private final AuthService authService;
@@ -32,13 +31,21 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @PostMapping("/signup/social")
-    public ResponseEntity<CommonResponseDto<LoginSuccessResponseDto>> completeSocialSignup(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,
-                                                                                           @RequestBody SignupRequestDto requestDto) {
+    @PostMapping("/signUp/social")
+    public ResponseEntity<CommonResponseDto<LoginSuccessResponseDto>> completeSocialSignup(
+            @CookieValue(name = "signUpToken", required = false)
+            String signUpToken,
+            @RequestBody SignupRequestDto requestDto) {
 
-        TokensDto tokens = authService.completeSocialSignup(authorizationHeader, requestDto);
+        return getCommonResponseDtoResponseEntity(authService.completeSocialSignUp(signUpToken, requestDto), "회원 가입이 완료 되었습니다.");
+    }
 
-        return getCommonResponseDtoResponseEntity(tokens, "회원 가입이 완료 되었습니다.");
+    @PostMapping("/signIn/social")
+    public ResponseEntity<CommonResponseDto<LoginSuccessResponseDto>> completeSocialSignIn(
+            @CookieValue(name = "signInToken", required = false)
+            String signInToken) {
+
+        return getCommonResponseDtoResponseEntity(authService.completeSocialSignIn(signInToken), "로그인 완료 되었습니다.");
     }
 
     @PostMapping("/refresh")
@@ -52,7 +59,7 @@ public class AuthController {
 
     private ResponseEntity<CommonResponseDto<LoginSuccessResponseDto>> getCommonResponseDtoResponseEntity(TokensDto tokens, String message) {
 
-        Duration tokenExp  = Duration.ofMillis(refreshTokenExpirationMillis);
+        Duration tokenExp = Duration.ofMillis(refreshTokenExpirationMillis);
         Duration cookieExp = tokenExp.plusMinutes(10);
         ResponseCookie cookie = ResponseCookie.from("refreshToken", tokens.getRefreshToken())
                 .path("/")
@@ -76,7 +83,6 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<CommonResponseDto<Void>> logout() {
 
-        // ResponseCookie 빌더를 사용하여 쿠키를 만료시킵니다.
         ResponseCookie expiredCookie = ResponseCookie.from("refreshToken", null)
                 .maxAge(0)
                 .path("/")

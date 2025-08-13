@@ -5,5 +5,5 @@ import lombok.Getter;
 @Getter
 public class SignupRequestDto {
     String nickname;
-    String imageId;
+    String imageUuid;
 }

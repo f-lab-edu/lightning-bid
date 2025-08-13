@@ -6,6 +6,7 @@ import com.lightningbid.auth.dto.UserDto;
 import com.lightningbid.auth.enums.Role;
 import com.lightningbid.auth.enums.TokenErrorCode;
 import com.lightningbid.common.dto.CommonResponseDto;
+import com.lightningbid.common.enums.ErrorCode;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
@@ -15,6 +16,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -36,7 +38,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         String requestURI = request.getRequestURI();
-        // 로그아웃 및 토큰 재발급 경로는 토큰 검증을 건너뛴다.
+        // 로그아웃 및 토큰 재발급 경로는 엑세스 토큰이 있어도 검증을 건너뛴다.
         if (requestURI.endsWith("/auth/logout") || requestURI.endsWith("/auth/refresh")) {
             filterChain.doFilter(request, response);
             return;
@@ -63,7 +65,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     "Bearer error=\"invalid_token\", error_description=\"The access token expired\""
             );
 
-            sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "토큰이 만료되었습니다.", TokenErrorCode.TOKEN_EXPIRED.name());
+            sendErrorResponse(
+                    response,
+                    ErrorCode.ACCESS_TOKEN_EXPIRED.getHttpStatus().value(),
+                    ErrorCode.ACCESS_TOKEN_EXPIRED.getMessage(),
+                    ErrorCode.ACCESS_TOKEN_EXPIRED.getCode()
+            );
             return;
 
         } catch (JwtException | IllegalArgumentException e) {
@@ -74,7 +81,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     "Bearer error=\"invalid_token\", error_description=\"The token is malformed or invalid\""
             );
 
-            sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "유효하지 않은 토큰입니다.", TokenErrorCode.TOKEN_INVALID.name());
+            sendErrorResponse(
+                    response,
+                    ErrorCode.ACCESS_TOKEN_INVALID.getHttpStatus().value(),
+                    ErrorCode.ACCESS_TOKEN_INVALID.getMessage(),
+                    ErrorCode.ACCESS_TOKEN_INVALID.getCode()
+            );
             return;
         }
 
@@ -86,9 +98,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // 권한에 따른 접근 제어
         if (Role.ROLE_GUEST.name().equals(roleStr)) {
             // GUEST 권한은 회원가입 API 에만 접근가능
-            if (!requestURI.endsWith("/auth/signup/social")) {
+            if (!requestURI.endsWith("/auth/signUp/social")) {
                 log.warn("GUEST 권한으로 허용되지 않은 경로에 접근 시도: {}", requestURI);
-                sendErrorResponse(response, HttpServletResponse.SC_FORBIDDEN, "접근 권한이 없는 토큰입니다.", null);
+                sendErrorResponse(
+                        response,
+                        ErrorCode.ACCESS_TOKEN_FORBIDDEN.getHttpStatus().value(),
+                        ErrorCode.ACCESS_TOKEN_FORBIDDEN.getMessage(),
+                        ErrorCode.ACCESS_TOKEN_FORBIDDEN.getCode()
+                );
+
                 return;
             }
         }

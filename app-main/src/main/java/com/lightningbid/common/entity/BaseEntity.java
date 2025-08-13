@@ -36,4 +36,8 @@ public abstract class BaseEntity {
 
     @Column(nullable = false)
     private boolean deleteYn;
+
+    public void softDelete() {
+        this.deleteYn = true;
+    }
 }

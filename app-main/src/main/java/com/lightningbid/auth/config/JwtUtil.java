@@ -31,21 +31,21 @@ public class JwtUtil {
         this.refreshTokenExpirationMillis = refreshTokenExpirationMillis;
     }
 
-    public String createAccessToken(Long id, String username, String role, String nickname, String profileUrl) {
-        return createToken(id, username, role, nickname, profileUrl, accessTokenExpirationMillis);
+    public String createAccessToken(Long id, String username, String role, String nickname) {
+        return createToken(id, username, role, nickname, accessTokenExpirationMillis);
     }
 
     public String createRefreshToken(String username, String role) {
-        return createToken(null, username, role, null, null, refreshTokenExpirationMillis);
+        return createToken(null, username, role, null, refreshTokenExpirationMillis);
     }
 
     // 소셜 로그인 후 추가 정보 입력을 위한 임시 토큰 생성.
-    public String createSignupToken(String username, String role) {
+    public String createSignToken(String username, String role) {
         long validityInMilliseconds = 10 * 60 * 1000L;
-        return createToken(null, username, role, null, null, validityInMilliseconds);
+        return createToken(null, username, role, null, validityInMilliseconds);
     }
 
-    private String createToken(Long id, String username, String role, String nickname, String profileUrl, Long expirationMillis) {
+    private String createToken(Long id, String username, String role, String nickname, Long expirationMillis) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expirationMillis);
 
@@ -53,7 +53,6 @@ public class JwtUtil {
                 .subject(username)
                 .claim("id", id)
                 .claim("nickname", nickname)
-                .claim("profileUrl", profileUrl)
                 .claim("role", role)
                 .issuedAt(now)
                 .expiration(expiryDate)

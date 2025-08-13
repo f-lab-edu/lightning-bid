@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 @Entity
 public class BidUnit {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "bid_unit_id")
     private Long id;
 
     @Column(nullable = false)

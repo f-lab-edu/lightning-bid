@@ -17,6 +17,9 @@ public class AuctionDto {
 
     private BigDecimal startPrice;
     private BigDecimal currentBid;
+    private BigDecimal instantSalePrice;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime instantSaleEndTime;
     private BigDecimal bidUnit;
     private Integer bidCount;
 

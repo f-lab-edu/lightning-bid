@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Builder
 @Getter
 @AllArgsConstructor
@@ -13,5 +15,5 @@ import lombok.NoArgsConstructor;
 public class BidCreateRequestDto {
 
     @NotNull
-    private Integer price;
+    private BigDecimal price;
 }

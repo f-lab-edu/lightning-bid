@@ -41,7 +41,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         } */
         else {
             log.warn("지원하지 않는 소셜 로그인입니다: {}", registrationId);
-            // TODO 예외처리 추가
             throw new OAuth2AuthenticationException("지원하지 않는 소셜 로그인입니다: " + registrationId);
         }
 
@@ -76,7 +75,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 .id(user.getId())
                 .username(user.getUsername())
                 .nickname(user.getNickname())
-                .profileUrl(user.getProfileUrl())
+//                .profileUrl(user.getFileId()) TODO
                 .name(user.getName())
                 .role(user.getRole())
                 .build();

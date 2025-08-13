@@ -66,9 +66,6 @@ class ItemControllerTest {
                 .build();
         String requestJson = objectMapper.writeValueAsString(requestDto);
 
-        System.out.println("requestJson = " + requestJson);
-        
-        
         // HttpHeaders 생성 및 Content-Type 설정
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter
@@ -17,6 +18,8 @@ public class ItemSummaryDto {
 
     private Long itemId;
 
+    private Long auctionId;
+
     private String title;
 
     private String thumbnailUrl;
@@ -25,9 +28,9 @@ public class ItemSummaryDto {
 
     private UserResponseDto seller;
 
-    private int price; // 즉시 구매가 또는 경매 시작가
+    private BigDecimal price;
 
-    private Integer currentBid; // 현재 입찰가 (null일 수 있으므로 Integer 사용)
+    private BigDecimal currentBid;
 
     private String status;
 
