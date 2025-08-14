@@ -9,6 +9,7 @@ import com.lightningbid.file.web.dto.FileUploadResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
@@ -23,14 +24,13 @@ public class FileService {
 
     private final FileRepository fileRepository;
 
+    @Transactional
     public List<FileUploadResponseDto> uploadAndSaveFiles(List<MultipartFile> files, FileDomain fileDomain) {
 
         List<FileUploadResponseDto> responseDto = new ArrayList<>();
 
         for (MultipartFile file : files) {
-            if (file.isEmpty()) {
-                continue;
-            }
+            if (file.isEmpty()) continue;
 
             validateFile(file, fileDomain);
 
@@ -47,18 +47,33 @@ public class FileService {
         return responseDto;
     }
 
+    @Transactional(readOnly = true)
     public File findFileByUuid(String uuid) {
 
         return fileRepository.findByUuid(uuid).orElseThrow(FileNotFoundException::new);
     }
 
-    public void softDeleteFileByExcludingFileIdAndUserId(Long fileUuid, Long userId) {
+    @Transactional(readOnly = true)
+    public List<File> findFilesByItemIdOrUserId(Long itemId, Long userId) {
 
-        fileRepository.softDeleteByExcludingIdAndUserId(fileUuid, userId);
+        return fileRepository.findByItemIdOrUserId(itemId, userId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<File> findFileRepresentativeFilesByItemIds(List<Long> itemIds) {
+
+        return fileRepository.findRepresentativeFilesByItemIds(itemIds);
+    }
+
+    @Transactional
+    public void updateFileItemIdByUuidIn(Long itemId, Long userId, List<String> uuids) {
+
+        fileRepository.updateItemIdByUuidIn(itemId, userId, uuids);
     }
 
     private File saveFileMetadata(MultipartFile multipartFile, String storedFileUrl, FileDomain fileDomain) {
-        File file = File.builder()
+
+        return fileRepository.save(File.builder()
                 .originalFileName(multipartFile.getOriginalFilename())
                 .uuid(extractStoredFileName(storedFileUrl).split("\\.")[0])
                 .domain(fileDomain)
@@ -66,9 +81,7 @@ public class FileService {
                 .fileUrl(storedFileUrl)
                 .mimeType(multipartFile.getContentType())
                 .fileSize(multipartFile.getSize())
-                .build();
-
-        return fileRepository.save(file);
+                .build());
     }
 
     private void validateFile(MultipartFile file, FileDomain domain) {

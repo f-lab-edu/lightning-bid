@@ -17,7 +17,6 @@ public interface ItemRepository extends JpaRepository<Item, Long>, ItemRepositor
     @Query("UPDATE Item i SET i.viewCount = i.viewCount + 1 WHERE i.id = :id")
     void increaseViewCount(Long id);
 
-//    @Query("SELECT i, a FROM Item i JOIN FETCH i.auction a WHERE i.id = :id")
     @Query("SELECT i FROM Item i JOIN FETCH i.auction a JOIN FETCH i.user u WHERE i.id = :itemId")
     Optional<Item> findWithAuctionAndUserById(Long itemId);
 

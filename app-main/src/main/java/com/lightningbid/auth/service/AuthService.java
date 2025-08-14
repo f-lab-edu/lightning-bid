@@ -49,12 +49,9 @@ public class AuthService {
             throw new NicknameAlreadyInUseException("이미 사용 중인 닉네임입니다. 입력: " + requestDto.getNickname());
 
         File file = fileService.findFileByUuid(requestDto.getImageUuid());
+        file.updateUser(user);
 
-        Long userId = user.getId();
-
-        fileService.softDeleteFileByExcludingFileIdAndUserId(file.getId(), userId);
-
-        user.completeSignup(requestDto.getNickname(), file.getId());
+        user.completeSignup(requestDto.getNickname());
 
         return issueTokens(user);
     }

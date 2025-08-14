@@ -8,8 +8,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.List;
 
@@ -34,8 +36,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({
             HttpMessageNotReadableException.class // 클라이언트 JSON 형식 불일치
             , OAuth2AuthenticationException.class
+            , MethodArgumentTypeMismatchException.class // @RequestParam 형식 불일치
+            , MissingServletRequestParameterException.class // @RequestParam 누락
     })
-    public ResponseEntity<CommonResponseDto<Void>> handleIllegalArgumentException(RuntimeException e) {
+    public ResponseEntity<CommonResponseDto<Void>> handleIllegalArgumentException(Exception e) {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                 CommonResponseDto.error(HttpStatus.BAD_REQUEST.value(), e.getMessage())

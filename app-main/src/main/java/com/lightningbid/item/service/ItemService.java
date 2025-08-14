@@ -5,6 +5,8 @@ import com.lightningbid.auction.domain.model.Auction;
 import com.lightningbid.auction.service.AuctionService;
 import com.lightningbid.auth.dto.CustomOAuth2User;
 import com.lightningbid.common.dto.CursorResult;
+import com.lightningbid.file.domain.model.File;
+import com.lightningbid.file.service.FileService;
 import com.lightningbid.item.domain.enums.ItemStatus;
 import com.lightningbid.item.domain.model.Item;
 import com.lightningbid.item.domain.repository.ItemRepository;
@@ -25,7 +27,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -43,6 +48,8 @@ public class ItemService {
     private final AuctionService auctionService;
 
     private final UserService userService;
+
+    private final FileService fileService;
 
     @Transactional
     public ItemCreateResponseDto createItemWithAuction(ItemCreateRequestDto itemCreateRequestDto, Duration auctionDuration, CustomOAuth2User user) {
@@ -70,9 +77,22 @@ public class ItemService {
                         .build())
                 .build();
 
-        Auction resultAuction = auctionService.createAuction(auction);
 
+        Auction resultAuction = auctionService.createAuction(auction);
         Item resultItem = resultAuction.getItem();
+
+        fileService.updateFileItemIdByUuidIn(resultItem.getId(), user.getId(), itemCreateRequestDto.getImageIds());
+
+        List<File> files = fileService.findFilesByItemIdOrUserId(resultItem.getId(), user.getId());
+        String profileImageUrl = null;
+        List<String> itemImageUrls = new ArrayList<>();
+        for (File file : files) {
+            if (file.getItem() == null && profileImageUrl == null)
+                profileImageUrl = file.getFileUrl();
+            else
+                itemImageUrls.add(file.getFileUrl());
+        }
+
 
         return ItemCreateResponseDto.builder()
                 .itemId(resultItem.getId())
@@ -85,7 +105,7 @@ public class ItemService {
                 .isDirectTrade(resultItem.getIsDirectTrade())
 
                 .imageIds(itemCreateRequestDto.getImageIds())
-                .imageUrls(List.of("https://...", "https://..."))
+                .imageUrls(itemImageUrls)
 
                 .location(resultItem.getLocation())
                 .startPrice(resultAuction.getStartPrice())
@@ -94,7 +114,7 @@ public class ItemService {
                 .seller(UserResponseDto.builder()
                         .userId(user.getId())
                         .nickname(user.getNickname())
-                        .profileImageUrl(user.getProfileUrl())
+                        .profileImageUrl(profileImageUrl)
                         .build())
                 .createdAt(resultAuction.getCreatedAt())
                 .auctionStartTime(resultAuction.getAuctionStartTime())
@@ -108,7 +128,7 @@ public class ItemService {
         log.info("findItemWithAuctionByItemId() 현재 스레드: {}", Thread.currentThread().getName());
 
         Item findItem = itemRepository.findWithAuctionAndUserById(itemId)
-                .orElseThrow(() -> new ItemNotFoundException("조회된 상품이 없습니다. (입력: " + itemId + ")" ));
+                .orElseThrow(() -> new ItemNotFoundException("조회된 상품이 없습니다. (입력: " + itemId + ")"));
         Auction findAuction = findItem.getAuction();
 
         // TODO 좋아요 여부 개발
@@ -118,6 +138,16 @@ public class ItemService {
         boolean isDepositPaid = false;
 
         User seller = userService.findById(findItem.getUser().getId());
+
+        List<File> files = fileService.findFilesByItemIdOrUserId(findItem.getId(), userId);
+        String profileImageUrl = null;
+        List<String> itemImageUrls = new ArrayList<>();
+        for (File file : files) {
+            if (file.getItem() == null && profileImageUrl == null)
+                profileImageUrl = file.getFileUrl();
+            else
+                itemImageUrls.add(file.getFileUrl());
+        }
 
         // 조회수는 별도의 스레드에서 증가만 시킨다.
         itemAsyncService.increaseViewCount(itemId);
@@ -130,11 +160,7 @@ public class ItemService {
                 .categoryId(findItem.getCategoryId())
                 .categoryName(categoryService.findCategoryNameById(findItem.getCategoryId()))
                 .imageIds(List.of("1", "2", "3"))
-                .imageUrls(List.of(
-                        "https://...",
-                        "https://...",
-                        "https://..."
-                ))
+                .imageUrls(itemImageUrls)
                 .status(findItem.getStatus().getKoreanCode())
                 .isDirectTrade(findItem.getIsDirectTrade())
                 .location(findItem.getLocation())
@@ -146,7 +172,7 @@ public class ItemService {
                 .seller(UserResponseDto.builder()
                         .userId(seller.getId())
                         .nickname(seller.getNickname())
-//                        .profileImageUrl(seller.getFileId()) TODO
+                        .profileImageUrl(profileImageUrl)
                         .build())
                 .auction(AuctionDto.builder()
                         .startPrice(findAuction.getStartPrice())
@@ -164,7 +190,28 @@ public class ItemService {
     @Transactional(readOnly = true)
     public CursorResult<ItemSummaryDto> getItems(String title, String sortColumn, String sortDirection, String cursor, int pageSize) {
         Pageable pageable = PageRequest.of(0, pageSize);
-        return itemRepository.search(title, sortColumn, sortDirection, cursor, pageable);
+
+        // ItemSummaryDto 조회
+        CursorResult<ItemSummaryDto> search = itemRepository.search(title, sortColumn, sortDirection, cursor, pageable);
+        List<ItemSummaryDto> ItemSummaryDtoList = search.getContent();
+
+        // 상품의 대표 이미지 조회
+        List<Long> itemIds = ItemSummaryDtoList.stream().map(ItemSummaryDto::getItemId).toList();
+        List<File> representativeImagesRaw = fileService.findFileRepresentativeFilesByItemIds(itemIds);
+
+        // 대표 이미지 Map 으로 변환
+        Map<Long, String> imageMap = representativeImagesRaw.stream()
+                .collect(Collectors.toMap(
+                        file -> file.getItem().getId(),
+                        File::getFileUrl
+                ));
+
+        // ItemSummaryDto에 대표 이미지 Merge
+        ItemSummaryDtoList.forEach(ItemSummaryDto ->
+                ItemSummaryDto.setThumbnailUrl(imageMap.get(ItemSummaryDto.getItemId()))
+        );
+
+        return search;
     }
 
     @Transactional(readOnly = true)
