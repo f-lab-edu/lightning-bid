@@ -12,6 +12,8 @@ public class ItemResponseDto {
 
     private Long itemId;
 
+    private Long auctionId;
+
     private String title;
 
     private String description;

@@ -3,10 +3,12 @@ package com.lightningbid.auth.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lightningbid.auth.enums.TokenErrorCode;
 import com.lightningbid.common.dto.CommonResponseDto;
+import com.lightningbid.common.enums.ErrorCode;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+@Slf4j
 @RequiredArgsConstructor
 @Component
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
@@ -29,9 +32,9 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
         CommonResponseDto<String> errorResponse = CommonResponseDto.error(
-                HttpStatus.UNAUTHORIZED.value(),
-                "인증이 필요합니다.",
-                TokenErrorCode.TOKEN_EMPTY.name()
+                ErrorCode.ACCESS_TOKEN_FORBIDDEN.getHttpStatus().value(),
+                ErrorCode.ACCESS_TOKEN_FORBIDDEN.getMessage(),
+                ErrorCode.ACCESS_TOKEN_FORBIDDEN.getCode()
         );
 
         response.getWriter().write(objectMapper.writeValueAsString(errorResponse));

@@ -50,7 +50,7 @@ class AuctionServiceTest {
                 .build();
 
         // auctionRepository.findBidUnit() 메서드가 호출 될 시 행동 지시(willReturn)
-        given(bidUnitService.getBidUnit(any(BigDecimal.class))).willReturn(BigDecimal.valueOf(1000));
+        given(bidUnitService.getBidUnitByPrice(any(BigDecimal.class))).willReturn(BigDecimal.valueOf(1000));
 
         // auctionRepository.save() 메서드가 어떤 Auction 객체로 호출되면, 파라미터로 받은 Auction 객체를 그대로 반환하라고 지시
         given(auctionRepository.save(any(Auction.class))).willReturn(savedAuction);
@@ -66,7 +66,7 @@ class AuctionServiceTest {
         assertThat(createdAuction.getAuctionEndTime()).isNotNull();
 
         // repository의 메서드들이 정확히 호출되었는지 확인
-        verify(bidUnitService).getBidUnit(auction.getStartPrice());
+        verify(bidUnitService).getBidUnitByPrice(auction.getStartPrice());
         // verify(auctionRepository, times(1)).findBidUnit(auction.getStartPrice()); // times(1) 은 기본값으로 생략해도 위 코드랑 동일. 1번 호출었는지 체크.
         verify(auctionRepository).save(auction);
     }
@@ -113,7 +113,7 @@ class AuctionServiceTest {
     void createAuction_Fail(Auction auction, String expectedErrorMessage) {
 
         // given
-        given(bidUnitService.getBidUnit(any(BigDecimal.class))).willReturn(BigDecimal.valueOf(1000));
+        given(bidUnitService.getBidUnitByPrice(any(BigDecimal.class))).willReturn(BigDecimal.valueOf(1000));
 
         // when & then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
@@ -123,7 +123,7 @@ class AuctionServiceTest {
         assertThat(exception.getMessage()).contains(expectedErrorMessage);
 
         // 실패 시에는 save 메서드가 절대 호출되지 않는지 검증
-        verify(bidUnitService).getBidUnit(auction.getStartPrice());
+        verify(bidUnitService).getBidUnitByPrice(auction.getStartPrice());
         verify(auctionRepository, never()).save(any(Auction.class));
     }
 

@@ -24,15 +24,20 @@ public abstract class BaseEntity {
     private LocalDateTime createdAt;
 
     @CreatedBy
-//    @Column(nullable = false, updatable = false)
-    private String createdBy;
+    @Column(nullable = false, updatable = false)
+    private Long createdBy;
 
     @LastModifiedDate
     private LocalDateTime lastModifiedAt;
 
     @LastModifiedBy
-    private String lastModifiedBy;
+    @Column(nullable = false, updatable = false)
+    private Long lastModifiedBy;
 
     @Column(nullable = false)
     private boolean deleteYn;
+
+    public void softDelete() {
+        this.deleteYn = true;
+    }
 }

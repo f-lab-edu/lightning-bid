@@ -8,6 +8,8 @@ import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Builder
 @Getter
@@ -41,11 +43,21 @@ public class Auction extends BaseEntity {
     @Column(nullable = false)
     private LocalDateTime auctionEndTime;
 
+    private LocalDateTime instantSaleEndTime;
+
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "item_id")
     private Item item;
 
     public void applyBidUnit(BigDecimal bidUnit) {
         this.bidUnit = bidUnit;
+    }
+
+    public void updateCurrentBid(BigDecimal currentBid, LocalDateTime instantSaleEndTime) {
+        this.currentBid = currentBid;
+        this.bidCount += 1;
+        if (instantSaleEndTime != null) {
+            this.instantSaleEndTime = instantSaleEndTime;
+        }
     }
 }

@@ -3,14 +3,22 @@ package com.lightningbid.auth.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.Collections;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -28,8 +36,13 @@ public class SecurityConfig {
 
     private final ObjectMapper objectMapper;
 
+    @Value("${cors.allowed-origins}")
+    private String[] allowedOrigins;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
+        http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
 
         // CSRF, Form Login, HTTP Basic 인증 비활성화
         http.csrf(AbstractHttpConfigurer::disable);
@@ -47,9 +60,11 @@ public class SecurityConfig {
 
         // 경로별 인가 설정
         http.authorizeHttpRequests((auth) -> auth
-                .requestMatchers("/", "/login", "/v1/auth/signup/social", "/v1/auth/refresh", "/v1/auth/logout").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/", "/login", "/v1/auth/signUp/social", "/v1/auth/signIn/social",
+                                "/v1/auth/refresh", "/v1/auth/logout").permitAll()
 //                .requestMatchers(HttpMethod.GET, "/v1/items/*").permitAll()
-                .anyRequest().authenticated()
+                        .anyRequest().authenticated()
         );
 
         // 세션 관리 설정을 STATELESS로 변경 (JWT 인증 방식을 사용하기 위함)
@@ -61,5 +76,28 @@ public class SecurityConfig {
         );
 
         return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        configuration.setAllowedOrigins(Arrays.asList(allowedOrigins));
+
+        // 허용할 HTTP 메서드
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+
+        configuration.setAllowedHeaders(Collections.singletonList("*"));
+
+        // 자격 증명(쿠키, 인증 헤더 등)을 허용할지 여부
+        configuration.setAllowCredentials(true);
+
+        // 노출할 헤더 설정 (필요 시)
+        // configuration.setExposedHeaders(Collections.singletonList("Authorization"));
+
+        // 모든 경로에 대해 위 설정 적용
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }

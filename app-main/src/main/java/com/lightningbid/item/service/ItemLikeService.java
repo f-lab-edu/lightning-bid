@@ -10,7 +10,7 @@ public class ItemLikeService {
     ItemLikeRepository itemLikeRepository = new ItemLikeRepository();
 
     @Transactional(readOnly = true)
-    public boolean checkUserLikeStatus(Long userId, Long itemId) {
+    public boolean checkItemLikeStatus(Long userId, Long itemId) {
 
         return itemLikeRepository.existsByItemIdAndUserIdAndIsLiked(userId, itemId, true);
     }

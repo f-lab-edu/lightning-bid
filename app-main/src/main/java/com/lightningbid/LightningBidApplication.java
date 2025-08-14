@@ -9,10 +9,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 
 @EnableAsync
 @EnableJpaAuditing
-@SpringBootApplication(exclude = {
-        SecurityAutoConfiguration.class
-        , ManagementWebSecurityAutoConfiguration.class
-})
+@SpringBootApplication
 public class LightningBidApplication {
     public static void main(String[] args) {
         SpringApplication.run(LightningBidApplication.class, args);

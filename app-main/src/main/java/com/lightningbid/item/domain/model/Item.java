@@ -2,10 +2,15 @@ package com.lightningbid.item.domain.model;
 
 import com.lightningbid.auction.domain.model.Auction;
 import com.lightningbid.common.entity.BaseEntity;
+import com.lightningbid.file.domain.model.File;
 import com.lightningbid.item.domain.enums.ItemStatus;
+import com.lightningbid.user.domain.model.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Builder
@@ -17,7 +22,9 @@ public class Item extends BaseEntity {
     @Column(name = "item_id")
     private Long id;
 
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
     private String title;
 
@@ -49,6 +56,13 @@ public class Item extends BaseEntity {
     @Column(nullable = false)
     private int chatCount;
 
-    @OneToOne(mappedBy = "item", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "item")
     private Auction auction;
+
+    @OneToMany(mappedBy = "item", fetch = FetchType.LAZY)
+    private List<File> files = new ArrayList<>();
+
+    public void updateStatus(ItemStatus status) {
+        this.status = status;
+    }
 }

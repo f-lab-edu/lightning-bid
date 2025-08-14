@@ -1,38 +1,46 @@
 package com.lightningbid.auction.web.controller;
 
+import com.lightningbid.auction.service.BidService;
 import com.lightningbid.auction.web.dto.request.BidCreateRequestDto;
 import com.lightningbid.auction.web.dto.response.*;
+import com.lightningbid.auth.dto.CustomOAuth2User;
 import com.lightningbid.user.web.dto.response.UserResponseDto;
 import com.lightningbid.common.dto.CommonResponseDto;
 import com.lightningbid.item.domain.enums.ConfirmationStatus;
 import com.lightningbid.item.domain.enums.ItemStatus;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@RequiredArgsConstructor
 @RestController
-@RequestMapping("/v1/items")
+@RequestMapping("/v1/auctions")
 public class AuctionController {
 
-    @PostMapping("/{itemId}/bids")
-    public ResponseEntity<CommonResponseDto<BidCreateResponseDto>> createBid(
-            @RequestBody @Valid BidCreateRequestDto requestDto,
-            @PathVariable long itemId) {
+    private final BidService bidService;
 
-        BidCreateResponseDto responseDto = BidCreateResponseDto.builder()
-                .bidId(1L)
-                .itemId(itemId)
-                .currentBid(requestDto.getPrice())
-                .bidCount(1)
-                .build();
+    @PostMapping("/{auctionId}/bids")
+    public ResponseEntity<CommonResponseDto<BidCreateResponseDto>> createBid(
+            @AuthenticationPrincipal CustomOAuth2User user,
+            @RequestBody @Valid BidCreateRequestDto requestDto,
+            @PathVariable long auctionId) {
+
+        BidCreateResponseDto responseDto = bidService.addBid(requestDto, auctionId, user.getId());
+//        BidCreateResponseDto responseDto = BidCreateResponseDto.builder()
+//                .bidId(1L)
+//                .auctionId(auctionId)
+//                .currentBid(requestDto.getPrice())
+//                .build();
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                CommonResponseDto.success(HttpStatus.CREATED.value(), "입찰이 성공적으로 등록되었습니다.", responseDto)
+                CommonResponseDto.success(HttpStatus.CREATED.value(), "입찰에 성공하셨습니다.", responseDto)
         );
     }
 
