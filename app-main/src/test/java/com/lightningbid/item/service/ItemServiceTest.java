@@ -3,6 +3,8 @@ package com.lightningbid.item.service;
 import com.lightningbid.auction.domain.exception.ItemNotFoundException;
 import com.lightningbid.auction.domain.model.Auction;
 import com.lightningbid.auction.service.AuctionService;
+import com.lightningbid.auth.dto.CustomOAuth2User;
+import com.lightningbid.auth.dto.UserDto;
 import com.lightningbid.item.domain.enums.ItemStatus;
 import com.lightningbid.item.domain.model.Item;
 import com.lightningbid.item.domain.repository.ItemRepository;
@@ -98,7 +100,8 @@ class ItemServiceTest {
         given(auctionService.createAuction(any(Auction.class))).willReturn(savedAuction);
 
         // when
-        ItemCreateResponseDto responseDto = itemService.createItemWithAuction(requestDto, auctionDuration);
+        CustomOAuth2User user = CustomOAuth2User.builder().userDto(UserDto.builder().id(1L).build()).build();
+        ItemCreateResponseDto responseDto = itemService.createItemWithAuction(requestDto, auctionDuration, user);
 
         // then
         assertThat(responseDto).isNotNull();
@@ -159,12 +162,12 @@ class ItemServiceTest {
         Item findItem = findItemOptional.get();
 
         // given
-        given(itemRepository.findWithAuctionById(any(Long.class))).willReturn(findItemOptional);
-        given(itemLikeService.checkUserLikeStatus(any(Long.class), any(Long.class))).willReturn(isLike);
+        given(itemRepository.findWithAuctionAndUserById(any(Long.class))).willReturn(findItemOptional);
+        given(itemLikeService.checkItemLikeStatus(any(Long.class), any(Long.class))).willReturn(isLike);
         given(categoryService.findCategoryNameById(any(Long.class))).willReturn(expectedCategoryName);
 
         // when
-        ItemResponseDto responseDto = itemService.findItemWithAuctionByItemId(itemId);
+        ItemResponseDto responseDto = itemService.findItemWithAuctionByItemId(itemId, 1L);
 
         // then
         assertThat(responseDto).isNotNull();
@@ -189,8 +192,8 @@ class ItemServiceTest {
         assertThat(auction.getAuctionStartTime()).isEqualTo(findAuction.getAuctionStartTime());
         assertThat(auction.getAuctionEndTime()).isEqualTo(findAuction.getAuctionEndTime());
 
-        verify(itemRepository).findWithAuctionById(any(Long.class));
-        verify(itemLikeService).checkUserLikeStatus(any(Long.class), any(Long.class));
+        verify(itemRepository).findWithAuctionAndUserById(any(Long.class));
+        verify(itemLikeService).checkItemLikeStatus(any(Long.class), any(Long.class));
         verify(itemAsyncService).increaseViewCount(any(Long.class));
         verify(categoryService).findCategoryNameById(any(Long.class));
     }
@@ -202,18 +205,18 @@ class ItemServiceTest {
         // given: 존재하지 않는 ID와, 해당 ID로 조회 시 예외가 발생한다고 가정
         Long invalidItemId = 999L;
         String errorMessage = "조회된 상품이 없습니다.";
-        given(itemRepository.findWithAuctionById(invalidItemId))
+        given(itemRepository.findWithAuctionAndUserById(invalidItemId))
                 .willThrow(new ItemNotFoundException(errorMessage));
 
         // when
         ItemNotFoundException exception = assertThrows(ItemNotFoundException.class, () -> {
-            itemService.findItemWithAuctionByItemId(invalidItemId);
+            itemService.findItemWithAuctionByItemId(invalidItemId, 1L);
         });
 
         // then
         assertThat(exception.getMessage()).contains(errorMessage);
 
-        verify(itemLikeService, never()).checkUserLikeStatus(anyLong(), anyLong());
+        verify(itemLikeService, never()).checkItemLikeStatus(anyLong(), anyLong());
         verify(itemAsyncService, never()).increaseViewCount(anyLong());
         verify(categoryService, never()).findCategoryNameById(anyLong());
     }

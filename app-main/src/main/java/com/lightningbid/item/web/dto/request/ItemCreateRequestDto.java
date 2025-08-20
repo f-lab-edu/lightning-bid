@@ -37,6 +37,8 @@ public class ItemCreateRequestDto {
 
     private BigDecimal instantSalePrice;
 
+    private BigDecimal bidUnit;
+
 //    @NotNull
 //    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
 //    private LocalDateTime auctionEndTime;

@@ -41,18 +41,17 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         } */
         else {
             log.warn("지원하지 않는 소셜 로그인입니다: {}", registrationId);
-            // TODO 예외처리 추가
             throw new OAuth2AuthenticationException("지원하지 않는 소셜 로그인입니다: " + registrationId);
         }
 
         String username = oAuth2Response.getProvider() + "_" + oAuth2Response.getProviderId();
-
+        
         Optional<User> findUserOptional = userRepository.findByUsername(username);
         User user;
 
         if (findUserOptional.isEmpty()) {
             // 사용자가 없는 경우 -> 새로 생성 (회원가입)
-            user = User.builder()
+            user = userRepository.save(User.builder()
                     .username(username)
                     .name(oAuth2Response.getName())
                     .email(oAuth2Response.getEmail())
@@ -60,8 +59,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     .provider(oAuth2Response.getProvider())
                     .providerId(oAuth2Response.getProviderId())
                     .role(Role.ROLE_GUEST)
-                    .build();
-            userRepository.save(user);
+                    .build());
 
         } else {
             // 사용자가 있는 경우 -> 정보 업데이트
@@ -77,7 +75,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 .id(user.getId())
                 .username(user.getUsername())
                 .nickname(user.getNickname())
-                .profileUrl(user.getProfileUrl())
+//                .profileUrl(user.getFileId()) TODO
                 .name(user.getName())
                 .role(user.getRole())
                 .build();

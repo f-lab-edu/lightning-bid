@@ -1,6 +1,7 @@
 package com.lightningbid.item.service;
 
 import com.lightningbid.item.domain.repository.CategoryRepository;
+import com.lightningbid.item.exception.CategoryIdNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +14,7 @@ public class CategoryService {
     public String findCategoryNameById(Long categoryId) {
 
         return categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리 ID 입니다: " + categoryId))
+                .orElseThrow(CategoryIdNotFoundException::new)
                 .getName();
     }
 }

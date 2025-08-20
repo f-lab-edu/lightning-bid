@@ -41,10 +41,6 @@ public class CustomOAuth2User implements OAuth2User {
         return userDto.getNickname();
     }
 
-    public String getProfileUrl() {
-        return userDto.getProfileUrl();
-    }
-
     public Long getId() {
         return userDto.getId();
     }
