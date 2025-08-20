@@ -4,12 +4,16 @@ import com.lightningbid.auction.domain.exception.*;
 import com.lightningbid.auction.domain.model.Auction;
 import com.lightningbid.auction.domain.model.Bid;
 import com.lightningbid.auction.domain.repository.BidRepository;
+import com.lightningbid.auction.exception.DuplicateBidException;
 import com.lightningbid.auction.web.dto.request.BidCreateRequestDto;
 import com.lightningbid.auction.web.dto.response.BidCreateResponseDto;
 import com.lightningbid.item.domain.enums.ItemStatus;
 import com.lightningbid.item.domain.model.Item;
 import com.lightningbid.item.exception.ItemNotActiveException;
 import com.lightningbid.item.service.ItemService;
+import com.lightningbid.payments.domain.enums.PaymentsStatus;
+import com.lightningbid.payments.service.PaymentService;
+import com.lightningbid.user.domain.model.User;
 import com.lightningbid.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -30,6 +35,8 @@ public class BidService {
 
     private final ItemService itemService;
 
+    private final PaymentService paymentService;
+
     @Transactional
     public BidCreateResponseDto addBid(BidCreateRequestDto requestDto, Long auctionId, Long userId) {
 
@@ -37,10 +44,18 @@ public class BidService {
         if (ItemStatus.ACTIVE != itemWithAuction.getStatus())
             throw new ItemNotActiveException();
 
-        // TODO bid 테이블이 아닌 보증금 납부 테이블로 조회
         // 보증금 납부한 이력이 있는지 확인
-        if (!bidRepository.existsByAuctionIdAndUserId(auctionId, userId))
+        if (paymentService.findPaymentByAuctionIdAndUserIdAndStatus(auctionId, userId, PaymentsStatus.PAID).isEmpty())
             throw new DepositRequiredException();
+
+        // 최고 입찰자가 본인이면 에러 처리
+        Optional<Bid> firstByAuctionIdOrderByAmountDesc = bidRepository.findFirstByAuctionIdOrderByAmountDesc(auctionId);
+        if (firstByAuctionIdOrderByAmountDesc.isPresent()) {
+            Long bestBidUserId = firstByAuctionIdOrderByAmountDesc.get().getUser().getId();
+
+            if (userId.equals(bestBidUserId))
+                throw new DuplicateBidException();
+        }
 
         Auction findAuction = itemWithAuction.getAuction();
 
