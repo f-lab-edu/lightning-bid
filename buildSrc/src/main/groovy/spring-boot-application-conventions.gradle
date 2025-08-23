@@ -20,6 +20,9 @@ dependencies {
     // OAuth2 Client: 네이버, 구글 등 OAuth2 기반 소셜 로그인을 구현하는 라이브러리
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
+    // WebClient: 최신 비동기/논블로킹 방식의 HTTP 통신을 위한 클라이언트 라이브러리
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
     // 코드가 변경되었을 때 애플리케이션을 자동으로 재시작해주거나, 정적 파일을 새로고침 없이 바로 반영해주는 등 개발 편의성을 극대화해주는 도구
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 }

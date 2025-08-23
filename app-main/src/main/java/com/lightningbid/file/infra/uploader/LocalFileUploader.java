@@ -1,9 +1,11 @@
 package com.lightningbid.file.infra.uploader;
 
+import com.lightningbid.common.config.properties.FileProperties;
 import com.lightningbid.file.domain.enums.FileDomain;
 import com.lightningbid.file.exception.FileEmptyException;
 import com.lightningbid.file.exception.FileSaveFailedException;
 import com.lightningbid.file.service.FileUploader;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
@@ -21,11 +23,11 @@ import java.util.UUID;
 @Slf4j
 @Profile("!prd")
 @Primary
+@RequiredArgsConstructor
 @Component
 public class LocalFileUploader implements FileUploader {
 
-    @Value("${file.image.upload-dir}")
-    private String fileDir;
+    private final FileProperties fileProperties;
 
     @Override
     public String upload(MultipartFile image, FileDomain fileDomain) {
@@ -38,7 +40,7 @@ public class LocalFileUploader implements FileUploader {
                 : UUID.randomUUID() + "." + ext;
 
         try {
-            Path saveDir = Paths.get(fileDir, fileDomain.getPath());
+            Path saveDir = Paths.get(fileProperties.getImage().getUploadDir(), fileDomain.getPath());
             Path savePath = saveDir.resolve(storedFileName);
 
             // 디렉토리 없으면 생성, 있으면 통과

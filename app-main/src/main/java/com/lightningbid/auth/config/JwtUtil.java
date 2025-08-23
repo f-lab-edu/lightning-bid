@@ -1,11 +1,11 @@
 package com.lightningbid.auth.config;
 
+import com.lightningbid.common.config.properties.JwtProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -15,28 +15,22 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
+    private final JwtProperties jwtProperties;
+
     private final SecretKey secretKey;
 
-    private final Long accessTokenExpirationMillis;
+    public JwtUtil(JwtProperties jwtProperties) {
+        this.jwtProperties = jwtProperties;
 
-    private final Long refreshTokenExpirationMillis;
-
-    public JwtUtil(
-            @Value("${jwt.secret}") String secretKey,
-            @Value("${jwt.access-token-expiration-millis}") Long accessTokenExpirationMillis,
-            @Value("${jwt.refresh-token-expiration-millis}") Long refreshTokenExpirationMillis) {
-
-        this.secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
-        this.accessTokenExpirationMillis = accessTokenExpirationMillis;
-        this.refreshTokenExpirationMillis = refreshTokenExpirationMillis;
+        this.secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtProperties.getSecret()));
     }
 
     public String createAccessToken(Long id, String username, String role, String nickname) {
-        return createToken(id, username, role, nickname, accessTokenExpirationMillis);
+        return createToken(id, username, role, nickname, jwtProperties.getAccessTokenExpirationMillis());
     }
 
     public String createRefreshToken(String username, String role) {
-        return createToken(null, username, role, null, refreshTokenExpirationMillis);
+        return createToken(null, username, role, null, jwtProperties.getRefreshTokenExpirationMillis());
     }
 
     // 소셜 로그인 후 추가 정보 입력을 위한 임시 토큰 생성.

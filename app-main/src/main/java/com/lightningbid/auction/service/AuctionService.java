@@ -2,6 +2,7 @@ package com.lightningbid.auction.service;
 
 import com.lightningbid.auction.domain.model.Auction;
 import com.lightningbid.auction.domain.repository.AuctionRepository;
+import com.lightningbid.auction.exception.AuctionNotFoundException;
 import com.lightningbid.auction.exception.AuctionValidationException;
 import com.lightningbid.common.enums.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -68,5 +69,10 @@ public class AuctionService {
             if (instantSalePrice.subtract(startPrice).remainder(bidUnit).compareTo(BigDecimal.ZERO) != 0)
                 throw new AuctionValidationException("즉시 판매 가격이 입찰 단위와 맞지 않습니다. 즉시 판매 가격은 경매 시작 금액에 입찰 단위의 배수로 입력해 주세요.", ErrorCode.BID_UNIT_NOT_INSTANT_MULTIPLE);
         }
+    }
+
+    public Auction findAuctionByAuctionId(Long auctionId) {
+
+        return auctionRepository.findById(auctionId).orElseThrow(AuctionNotFoundException::new);
     }
 }

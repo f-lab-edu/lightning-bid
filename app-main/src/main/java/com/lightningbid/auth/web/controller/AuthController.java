@@ -2,9 +2,11 @@ package com.lightningbid.auth.web.controller;
 
 import com.lightningbid.auth.web.dto.response.LoginSuccessResponseDto;
 import com.lightningbid.auth.dto.TokensDto;
+import com.lightningbid.common.config.properties.JwtProperties;
 import com.lightningbid.common.dto.CommonResponseDto;
 import com.lightningbid.auth.service.AuthService;
 import com.lightningbid.user.web.dto.request.SignupRequestDto;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -14,22 +16,14 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/v1/auth")
 public class AuthController {
 
-    private final Long refreshTokenExpirationMillis;
-
     private final AuthService authService;
 
-    public AuthController(
-            @Value("${jwt.refresh-token-expiration-millis}")
-            Long refreshTokenExpirationMillis,
-            AuthService authService) {
-
-        this.refreshTokenExpirationMillis = refreshTokenExpirationMillis;
-        this.authService = authService;
-    }
+    private final JwtProperties jwtProperties;
 
     @PostMapping("/signUp/social")
     public ResponseEntity<CommonResponseDto<LoginSuccessResponseDto>> completeSocialSignup(
@@ -59,7 +53,7 @@ public class AuthController {
 
     private ResponseEntity<CommonResponseDto<LoginSuccessResponseDto>> getCommonResponseDtoResponseEntity(TokensDto tokens, String message) {
 
-        Duration tokenExp = Duration.ofMillis(refreshTokenExpirationMillis);
+        Duration tokenExp = Duration.ofMillis(jwtProperties.getRefreshTokenExpirationMillis());
         Duration cookieExp = tokenExp.plusMinutes(10);
         ResponseCookie cookie = ResponseCookie.from("refreshToken", tokens.getRefreshToken())
                 .path("/")

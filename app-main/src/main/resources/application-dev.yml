@@ -20,7 +20,7 @@ spring:
             # 1. 네이버 개발자 센터에서 발급받은 내 Client ID
             client-id: TfXaKERElirAiGjUJzN2
             # 2. 네이버 개발자 센터에서 발급받은 내 Client Secret
-            client-secret: y63ZBdhSHf
+            client-secret: l
             # 3. 로그인 성공 후 코드를 돌려받을 리다이렉트 URI
             # {baseUrl}은 현재 서버 주소(http://localhost:8080/api)로 자동 치환됩니다.
             # 이 주소는 네이버 개발자 콘솔에 등록한 Callback URL과 정확히 일치해야 합니다.
@@ -78,14 +78,16 @@ spring:
 jwt:
   secret: "and0LXNlY3JldC0xMjMtMTIzLTMyMS0zMjEtand0LXNlY3JldA=="
   # 1시간
-#  access-token-expiration-millis: 3600000
-  access-token-expiration-millis: 1209600000
+  access-token-expiration-millis: 3600000
+  # access-token-expiration-millis: 1209600000
 
   # 14일
-#  refresh-token-expiration-millis: 1209600000
+  #  refresh-token-expiration-millis: 1209600000
   refresh-token-expiration-millis: 60000
-
 
 file:
   image:
     upload-dir: /Users/choijihwan/lightning-bid/
+
+toss:
+  secret-key: test_sk_

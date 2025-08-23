@@ -24,6 +24,7 @@ public class File extends BaseEntity {
     @Column(name = "file_id")
     private Long id;
 
+    @Column(nullable = false, unique = true)
     private String uuid;
 
     @Enumerated(EnumType.STRING)
