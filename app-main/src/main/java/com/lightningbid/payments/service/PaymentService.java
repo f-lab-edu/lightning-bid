@@ -11,6 +11,7 @@ import com.lightningbid.payments.domain.model.TossPayment;
 import com.lightningbid.payments.domain.repository.PaymentRepository;
 import com.lightningbid.payments.exception.*;
 import com.lightningbid.payments.web.TossPaymentsApiClient;
+import com.lightningbid.payments.web.dto.request.PaymentConfirmRequestDto;
 import com.lightningbid.payments.web.dto.request.PaymentReadyRequestDto;
 import com.lightningbid.payments.web.dto.response.PaymentReadyResponseDto;
 import com.lightningbid.payments.web.dto.response.TossConfirmResponseDto;
@@ -35,14 +36,13 @@ public class PaymentService {
     private final UserRepository userRepository;
 
     private final AuctionService auctionService;
-
+    
     private final PaymentFailureService paymentFailureService;
 
     private final TossPaymentsApiClient tossPaymentsApiClient;
 
     private final BigDecimal DEPOSIT_PAYMENT_PERCENT = BigDecimal.valueOf(5);
 
-    @Transactional
     public PaymentReadyResponseDto readyDepositPayment(PaymentReadyRequestDto requestDto, Long userId) {
         // TODO 동시에 두번의 요청을 보낼 경우 처리
 
@@ -53,10 +53,11 @@ public class PaymentService {
             throw new ItemNotActiveException();
 
 
-        Optional<Payment> optionalPayments = paymentRepository.findByAuctionIdAndUserId(auctionId, userId);
-        if (optionalPayments.isPresent()) {
+        Optional<Payment> optionalPayment = paymentRepository.findByAuctionIdAndUserId(auctionId, userId);
 
-            Payment payment = optionalPayments.get();
+        if (optionalPayment.isPresent()) {
+
+            Payment payment = optionalPayment.get();
 
             if (PaymentsStatus.READY.equals(payment.getStatus())) {
 
@@ -96,11 +97,18 @@ public class PaymentService {
                 .build();
     }
 
-    @Transactional
-    public void processSuccessfulPayment(String paymentKey, String orderId, BigDecimal amount) {
+//    @Transactional
+    public void confirmPayment(PaymentConfirmRequestDto requestDto, Long userId) {
+
+        String paymentKey = requestDto.getPaymentKey();
+        String orderId = requestDto.getOrderId();
+        BigDecimal amount = requestDto.getAmount();
 
         Payment payment = paymentRepository.findByOrderId(orderId)
                 .orElseThrow(PaymentNotFoundException::new);
+
+        if (!userId.equals(payment.getUser().getId()))
+            throw new PaymentOwnershipException();
 
         if (!PaymentsStatus.READY.equals(payment.getStatus()))
             throw new PaymentNotReadyException();
@@ -111,7 +119,8 @@ public class PaymentService {
 
         try {
 
-            TossConfirmResponseDto response = tossPaymentsApiClient.confirmPayment(paymentKey, orderId, amount);
+//            TossConfirmResponseDto response = tossPaymentsApiClient.confirmPayment(paymentKey, orderId, amount);
+            TossConfirmResponseDto response = tossPaymentsApiClient.confirmPaymentRestTemplate(paymentKey, orderId, amount);
 
             payment.paymentSuccess(response.getPaymentKey());
             saveTossPaymentOnSuccess(payment, response);
@@ -173,19 +182,18 @@ public class PaymentService {
                 .build());
     }
 
-    @Transactional
-    public void processFailedPayment(String code, String message, String orderId) {
-
-        Payment payment = paymentRepository.findByOrderId(orderId)
-                .orElseThrow(PaymentNotFoundException::new);
-
-        if (!payment.getStatus().equals(PaymentsStatus.READY))
-            return;
-
-        payment.paymentFail();
-
-        saveTossPaymentOnFailure(payment, code, message);
-    }
+//    public void processFailedPayment(String code, String message, String orderId) {
+//
+//        Payment payment = paymentRepository.findByOrderId(orderId)
+//                .orElseThrow(PaymentNotFoundException::new);
+//
+//        if (!payment.getStatus().equals(PaymentsStatus.READY))
+//            return;
+//
+//        payment.paymentFail();
+//
+//        saveTossPaymentOnFailure(payment, code, message);
+//    }
 
     @Transactional(readOnly = true)
     public Optional<Payment> findPaymentByAuctionIdAndUserIdAndStatus(Long auctionId, Long userId, PaymentsStatus status) {

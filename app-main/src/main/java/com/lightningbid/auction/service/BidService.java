@@ -49,13 +49,11 @@ public class BidService {
             throw new DepositRequiredException();
 
         // 최고 입찰자가 본인이면 에러 처리
-        Optional<Bid> firstByAuctionIdOrderByAmountDesc = bidRepository.findFirstByAuctionIdOrderByAmountDesc(auctionId);
-        if (firstByAuctionIdOrderByAmountDesc.isPresent()) {
-            Long bestBidUserId = firstByAuctionIdOrderByAmountDesc.get().getUser().getId();
-
-            if (userId.equals(bestBidUserId))
-                throw new DuplicateBidException();
-        }
+        bidRepository.findFirstByAuctionIdOrderByAmountDesc(auctionId)
+                .filter(bid -> bid.getUser().getId().equals(userId))
+                .ifPresent(bid -> {
+                    throw new DuplicateBidException();
+                });
 
         Auction findAuction = itemWithAuction.getAuction();
 

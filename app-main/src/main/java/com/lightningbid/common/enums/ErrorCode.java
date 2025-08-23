@@ -51,6 +51,7 @@ public enum ErrorCode {
 
     // 403 FORBIDDEN: 권한 없음
     DEPOSIT_REQUIRED(HttpStatus.FORBIDDEN, "보증금 납부가 필요합니다.", null),
+    PAYMENT_OWNERSHIP_MISMATCH(HttpStatus.FORBIDDEN, "결제 요청한 회원이 일치하지 않습니다.", null),
 
     // 409
     USER_ALREADY_REGISTERED(HttpStatus.CONFLICT, "이미 가입이 완료된 사용자입니다.", null),
