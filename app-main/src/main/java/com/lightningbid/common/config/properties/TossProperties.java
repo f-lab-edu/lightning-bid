@@ -1,0 +1,18 @@
+package com.lightningbid.common.config.properties;
+
+import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
+
+@Validated
+@Getter
+@RequiredArgsConstructor
+@ConfigurationProperties(prefix = "toss")
+public class TossProperties {
+
+    @NotBlank
+    private final String secretKey;
+}
+

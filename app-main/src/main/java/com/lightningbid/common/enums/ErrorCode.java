@@ -23,6 +23,8 @@ public enum ErrorCode {
     BID_OVER_INSTANT(HttpStatus.BAD_REQUEST, "입찰 금액이 즉시구매가보다 높습니다.", null),
     AUCTION_ITEM_INACTIVE(HttpStatus.BAD_REQUEST, "판매 중인 제품에만 입찰에 참여하실 수 있습니다", null),
     FILE_EMPTY(HttpStatus.BAD_REQUEST, "업로드할 파일이 없습니다.", null),
+    PAYMENT_NOT_READY(HttpStatus.BAD_REQUEST, "결제 준비 중인 결제 건이 아닙니다.", null),
+    PAYMENT_AMOUNT_MISMATCH(HttpStatus.BAD_REQUEST, "결제 준비 금액과 일치하지 않습니다.", null),
 
     // 401
     REFRESH_TOKEN_MISSING(HttpStatus.UNAUTHORIZED, "리프레시 토큰이 쿠키에 존재하지 않습니다.", TokenErrorCode.REFRESH_TOKEN_MISSING.name()),
@@ -47,19 +49,30 @@ public enum ErrorCode {
     FILE_NOT_FOUND(HttpStatus.NOT_FOUND, "파일을 찾을 수 없습니다.", null),
     CATEGORY_ID_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 카테고리 ID 입니다", null),
 
-    // 403 FORBIDDEN: 권한 없음,
+    // 403 FORBIDDEN: 권한 없음
     DEPOSIT_REQUIRED(HttpStatus.FORBIDDEN, "보증금 납부가 필요합니다.", null),
+    PAYMENT_OWNERSHIP_MISMATCH(HttpStatus.FORBIDDEN, "결제 요청한 회원이 일치하지 않습니다.", null),
 
     // 409
-    USER_ALREADY_REGISTERED(HttpStatus.FORBIDDEN, "이미 가입이 완료된 사용자입니다.", null),
-    NICKNAME_DUPLICATE(HttpStatus.FORBIDDEN, "이미 사용 중인 닉네임입니다.", null),
+    USER_ALREADY_REGISTERED(HttpStatus.CONFLICT, "이미 가입이 완료된 사용자입니다.", null),
+    NICKNAME_DUPLICATE(HttpStatus.CONFLICT, "이미 사용 중인 닉네임입니다.", null),
+    PAYMENT_ALREADY_COMPLETED(HttpStatus.CONFLICT, "이미 결제 완료 된 경매 건 입니다.", null),
+    DUPLICATE_BID(HttpStatus.CONFLICT, "연속 입찰은 불가능 합니다.", null),
 
     // 415
     FILE_NOT_IMAGE(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "이미지 파일만 업로드할 수 있습니다.", null),
 
     // 500
-    FILE_SAVE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "파일 저장에 실패했습니다.", null)
+    FILE_SAVE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "파일 저장에 실패했습니다.", null),
+
+    // TOSS 결제 관련 에러
+    PAYMENT_BAD_REQUEST(HttpStatus.BAD_REQUEST, "결제 요청 정보가 정확하지 않습니다. 입력값을 확인해주세요.", "PAYMENT_BAD_REQUEST"),
+    PAYMENT_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "결제 요청을 위한 인증에 실패했습니다. 관리자에게 문의해주세요.", "PAYMENT_UNAUTHORIZED"),
+    PAYMENT_FORBIDDEN(HttpStatus.FORBIDDEN, "결제 한도 초과 혹은 잔액 부족 등 결제사 정책에 의해 거절되었습니다.", "PAYMENT_FORBIDDEN"),
+    PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "만료되었거나 존재하지 않는 결제 정보입니다.", "PAYMENT_NOT_FOUND"),
+    PAYMENT_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "결제사 시스템에 일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.", "PAYMENT_SERVER_ERROR");
     ;
+
     private final HttpStatus httpStatus;
     private final String message;
     private final String code;
