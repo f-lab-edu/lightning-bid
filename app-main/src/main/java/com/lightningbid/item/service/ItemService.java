@@ -53,7 +53,6 @@ public class ItemService {
 
     @Transactional
     public ItemCreateResponseDto createItemWithAuction(ItemCreateRequestDto itemCreateRequestDto, Duration auctionDuration, CustomOAuth2User user) {
-        // TODO 이미지 처리
 
         LocalDateTime auctionStartTime;
 
@@ -131,7 +130,6 @@ public class ItemService {
                 .orElseThrow(() -> new ItemNotFoundException("조회된 상품이 없습니다. (입력: " + itemId + ")"));
         Auction findAuction = findItem.getAuction();
 
-        // TODO 좋아요 여부 개발
         boolean isLiked = itemLikeService.checkItemLikeStatus(userId, itemId);
 
         // TODO 보증급 납부여부 개발

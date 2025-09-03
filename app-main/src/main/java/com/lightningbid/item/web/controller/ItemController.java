@@ -23,9 +23,9 @@ import java.time.Duration;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 
-@RestController
-@RequestMapping("/v1/items")
 @RequiredArgsConstructor
+@RequestMapping("/v1/items")
+@RestController
 public class ItemController {
 
     private final ItemService itemService;
