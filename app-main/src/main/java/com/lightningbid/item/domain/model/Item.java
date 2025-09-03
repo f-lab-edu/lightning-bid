@@ -62,6 +62,9 @@ public class Item extends BaseEntity {
     @OneToMany(mappedBy = "item", fetch = FetchType.LAZY)
     private List<File> files = new ArrayList<>();
 
+    @OneToMany(mappedBy = "item", fetch = FetchType.LAZY)
+    private List<ItemLike> itemLikes = new ArrayList<>();
+
     public void updateStatus(ItemStatus status) {
         this.status = status;
     }
