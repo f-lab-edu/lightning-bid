@@ -1,9 +1,10 @@
-package com.lightningbid.item.domain.repository;
+package com.lightningbid.item.domain.repository.impl;
 
 import com.lightningbid.auction.domain.model.Auction;
 import com.lightningbid.common.dto.CursorResult;
 import com.lightningbid.item.domain.enums.ItemStatus;
 import com.lightningbid.item.domain.model.Item;
+import com.lightningbid.item.domain.repository.ItemRepositoryCustom;
 import com.lightningbid.item.web.dto.response.ItemSummaryDto;
 import com.lightningbid.user.domain.model.User;
 import com.lightningbid.user.web.dto.response.UserResponseDto;
