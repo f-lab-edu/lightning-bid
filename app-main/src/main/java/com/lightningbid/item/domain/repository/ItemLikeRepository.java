@@ -1,17 +1,13 @@
 package com.lightningbid.item.domain.repository;
 
+import com.lightningbid.item.domain.model.ItemLike;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
-import com.lightningbid.item.domain.model.Item;
+import java.util.Optional;
 
-public class ItemLikeRepository {
+public interface ItemLikeRepository extends JpaRepository<ItemLike, Long> {
 
-    public Item save(Item item) {
-
-        return Item.builder().build();
-    }
-
-    public boolean existsByItemIdAndUserIdAndIsLiked(Long itemId, Long userId, boolean isLiked) {
-
-        return false;
-    }
+    @Query("SELECT il FROM ItemLike il WHERE il.user.id = :userId AND il.item.id = :itemId")
+    Optional<ItemLike> findByUserIdAndItemId(Long userId, Long itemId);
 }

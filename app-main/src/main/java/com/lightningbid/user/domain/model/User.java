@@ -2,6 +2,7 @@ package com.lightningbid.user.domain.model;
 
 import com.lightningbid.auth.enums.Role;
 import com.lightningbid.file.domain.model.File;
+import com.lightningbid.item.domain.model.ItemLike;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -49,6 +50,9 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<ItemLike> itemLikes = new ArrayList<>();
 
     public void updateOAuthInfo(String name, String phone, String email) {
         this.name = name;
