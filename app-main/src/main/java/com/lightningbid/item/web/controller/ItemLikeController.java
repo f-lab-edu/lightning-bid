@@ -3,7 +3,7 @@ package com.lightningbid.item.web.controller;
 import com.lightningbid.auth.dto.CustomOAuth2User;
 import com.lightningbid.common.dto.CommonResponseDto;
 import com.lightningbid.item.service.ItemLikeAsyncService;
-import com.lightningbid.item.service.ItemLikeService;
+import com.lightningbid.item.web.dto.request.ItemLikeEventDto;
 import com.lightningbid.item.web.dto.response.ItemLikeResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
@@ -22,7 +23,9 @@ public class ItemLikeController {
 
     private final ItemLikeAsyncService itemLikeAsyncService;
 
-    @PostMapping
+    private final Queue<ItemLikeEventDto> likeEventQue;
+
+//    @PostMapping
     public CompletableFuture<ResponseEntity<CommonResponseDto<ItemLikeResponseDto>>> likeItem(
             @AuthenticationPrincipal CustomOAuth2User user,
             @PathVariable Long itemId) {
@@ -69,5 +72,24 @@ public class ItemLikeController {
          * 'resultFuture' 가 ResponseEntity로 완료된 것을 Spring MVC가 감지.
          * 이후 Async Dispatch를 시작하여, 별도의 스레드를 통해 최종 응답을 클라이언트에게 전송한다.
          */
+    }
+
+    @PostMapping
+    public ResponseEntity<CommonResponseDto<Void>> upsertLikeItem(
+            @AuthenticationPrincipal CustomOAuth2User user,
+            @PathVariable Long itemId) {
+
+        // 좋아요 or 좋아요 취소 큐에 저장
+        likeEventQue.add(
+                ItemLikeEventDto.builder().
+                        userId(user.getId()).
+                        itemId(itemId)
+                        .build()
+        );
+        itemLikeAsyncService.triggerProcessing();
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                CommonResponseDto.success(HttpStatus.CREATED.value(), "좋아요/좋아요 취소 처리가 완료되었습니다.")
+        );
     }
 }
