@@ -4,6 +4,7 @@ import com.lightningbid.auction.domain.exception.*;
 import com.lightningbid.auction.domain.model.Auction;
 import com.lightningbid.auction.domain.model.Bid;
 import com.lightningbid.auction.domain.repository.BidRepository;
+import com.lightningbid.auction.dto.NewBidderNotificationEventDto;
 import com.lightningbid.auction.exception.DuplicateBidException;
 import com.lightningbid.auction.web.dto.request.BidCreateRequestDto;
 import com.lightningbid.auction.web.dto.response.BidCreateResponseDto;
@@ -16,6 +17,7 @@ import com.lightningbid.payments.service.PaymentService;
 import com.lightningbid.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +36,8 @@ public class BidService {
     private final ItemService itemService;
 
     private final PaymentService paymentService;
+
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public BidCreateResponseDto addBid(BidCreateRequestDto requestDto, Long auctionId, Long userId) {
@@ -102,7 +106,15 @@ public class BidService {
                 .user(userRepository.getReferenceById(userId))
                 .build());
 
-        findAuction.updateCurrentBid(bidRequestPrice, instantSaleEndTime);
+        findAuction.updateCurrentBid(savedBid.getAmount(), instantSaleEndTime);
+
+        eventPublisher.publishEvent(
+                NewBidderNotificationEventDto.builder()
+                        .bestBidAmount(savedBid.getAmount())
+                        .itemTitle(itemWithAuction.getTitle())
+                        .auctionId(savedBid.getId())
+                        .build()
+        );
 
         return BidCreateResponseDto.builder()
                 .bidId(savedBid.getId())
