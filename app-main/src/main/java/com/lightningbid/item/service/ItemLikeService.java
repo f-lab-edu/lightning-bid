@@ -1,13 +1,16 @@
 package com.lightningbid.item.service;
 
+import com.lightningbid.common.config.properties.KafkaProperties;
 import com.lightningbid.item.domain.model.ItemLike;
 import com.lightningbid.item.domain.repository.ItemLikeRepository;
 import com.lightningbid.item.domain.repository.ItemRepository;
 import com.lightningbid.item.web.dto.request.ItemLikeEventDto;
 import com.lightningbid.item.web.dto.response.ItemLikeResponseDto;
+import com.lightningbid.kafka.event.ItemLikeToggleEvent;
 import com.lightningbid.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +32,10 @@ public class ItemLikeService {
     private final Queue<ItemLikeEventDto> likeEventQue;
 
     private final ReentrantLock lock = new ReentrantLock();
+
+    private final KafkaTemplate<String, ItemLikeToggleEvent> kafkaTemplate;
+
+    private final KafkaProperties kafkaProperties;
 
     @Transactional(readOnly = true)
     public boolean checkItemLikeStatus(Long userId, Long itemId) {
@@ -92,7 +99,24 @@ public class ItemLikeService {
             }
 
         } finally {
-            lock.unlock(); // 모든 작업 후 반드시 락 해제
+            lock.unlock();
         }
+    }
+
+    public void publishToggleItemLikeEvent(Long userId, Long itemId) {
+
+        ItemLikeToggleEvent event = ItemLikeToggleEvent.newBuilder()
+                .setUserId(userId)
+                .setItemId(itemId)
+                .build();
+        kafkaTemplate.send(kafkaProperties.getTopics().getItemLikeTopic(), String.valueOf(itemId), event);
+//        for (int i = 0; i < 10000; i++)
+//            kafkaTemplate.send(kafkaProperties.getTopics().getItemLikeTopic(), String.valueOf(itemId), event);
+    }
+
+    @Transactional
+    public void bulkUpsertItemLike(List<ItemLikeEventDto> itemLikeEventDtoList) {
+
+        itemLikeRepository.bulkUpsertAndToggle(itemLikeEventDtoList);
     }
 }

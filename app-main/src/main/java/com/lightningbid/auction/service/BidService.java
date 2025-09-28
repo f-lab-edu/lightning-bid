@@ -8,16 +8,19 @@ import com.lightningbid.auction.dto.NewBidderNotificationEventDto;
 import com.lightningbid.auction.exception.DuplicateBidException;
 import com.lightningbid.auction.web.dto.request.BidCreateRequestDto;
 import com.lightningbid.auction.web.dto.response.BidCreateResponseDto;
+import com.lightningbid.common.config.properties.KafkaProperties;
 import com.lightningbid.item.domain.enums.ItemStatus;
 import com.lightningbid.item.domain.model.Item;
 import com.lightningbid.item.exception.ItemNotActiveException;
 import com.lightningbid.item.service.ItemService;
+import com.lightningbid.kafka.event.NewBidderNotificationEvent;
 import com.lightningbid.payments.domain.enums.PaymentsStatus;
 import com.lightningbid.payments.service.PaymentService;
 import com.lightningbid.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +41,10 @@ public class BidService {
     private final PaymentService paymentService;
 
     private final ApplicationEventPublisher eventPublisher;
+
+    private final KafkaTemplate<String, NewBidderNotificationEvent> kafkaTemplate;
+
+    private final KafkaProperties kafkaProperties;
 
     @Transactional
     public BidCreateResponseDto addBid(BidCreateRequestDto requestDto, Long auctionId, Long userId) {
@@ -108,13 +115,24 @@ public class BidService {
 
         findAuction.updateCurrentBid(savedBid.getAmount(), instantSaleEndTime);
 
-        eventPublisher.publishEvent(
-                NewBidderNotificationEventDto.builder()
-                        .bestBidAmount(savedBid.getAmount())
-                        .itemTitle(itemWithAuction.getTitle())
-                        .auctionId(savedBid.getId())
-                        .build()
-        );
+
+        // Spring event 호출
+//        eventPublisher.publishEvent(
+//                NewBidderNotificationEventDto.builder()
+//                        .bestBidAmount(savedBid.getAmount())
+//                        .itemTitle(itemWithAuction.getTitle())
+//                        .auctionId(savedBid.getId())
+//                        .build()
+//        );
+
+        // Protobuf 객체 생성
+        NewBidderNotificationEvent event = NewBidderNotificationEvent.newBuilder()
+                .setBestBidAmount(String.valueOf(savedBid.getAmount()))
+                .setItemTitle(itemWithAuction.getTitle())
+                .setAuctionId(savedBid.getId())
+                .build();
+        // 카프카 이벤트 발행
+        kafkaTemplate.send(kafkaProperties.getTopics().getBidNotificationTopic(), event);
 
         return BidCreateResponseDto.builder()
                 .bidId(savedBid.getId())

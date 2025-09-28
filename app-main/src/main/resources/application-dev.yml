@@ -75,6 +75,24 @@ spring:
     show-sql: true
     open-in-view: false
 
+  kafka:
+    bootstrap-servers: localhost:9092
+    properties:
+      schema.registry.url: http://localhost:8081
+    #    consumer:
+    #      auto-offset-reset: earliest
+    #      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    #      max-poll-records: 1000 # 컨슈머가 한 번에 poll() 할 때 최대로 가져올 최대 메시지 수 (기본값: 500)
+    #      fetch-min-bytes: 1024 # 10KB, 최소 이 정도 데이터가 쌓여야 가져오도록 설정, 10KB 안채워지면 채울때까지 대기 (기본값: 1byte)
+    #      fetch-max-wait-ms: 3000 # 최대 500ms 기다려서 데이터를 가져옴
+
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: io.confluent.kafka.serializers.protobuf.KafkaProtobufSerializer
+    topics:
+      bid-notification-topic: "bid-notification-topic"
+      item-like-topic: "item-like-topic"
+
 jwt:
   secret: "and0LXNlY3JldC0xMjMtMTIzLTMyMS0zMjEtand0LXNlY3JldA=="
   # 1시간

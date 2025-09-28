@@ -1,5 +1,6 @@
 plugins {
     id 'query-dsl-conventions'
+    id 'protobuf-conventions'
 }
 
 dependencies {

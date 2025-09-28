@@ -1,10 +1,8 @@
 package com.lightningbid.item.web.dto.request;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
+@EqualsAndHashCode
 @Getter
 @Builder
 @AllArgsConstructor

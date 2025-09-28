@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package com.lightningbid.kafka.event;
+
+option java_multiple_files = true;
+option java_outer_classname = "AuctionEvents";
+
+message NewBidderNotificationEvent {
+  string best_bid_amount = 1;
+  string item_title = 2;
+  int64 auction_id = 3;
+}

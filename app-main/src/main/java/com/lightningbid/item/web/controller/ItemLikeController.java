@@ -3,6 +3,7 @@ package com.lightningbid.item.web.controller;
 import com.lightningbid.auth.dto.CustomOAuth2User;
 import com.lightningbid.common.dto.CommonResponseDto;
 import com.lightningbid.item.service.ItemLikeAsyncService;
+import com.lightningbid.item.service.ItemLikeService;
 import com.lightningbid.item.web.dto.request.ItemLikeEventDto;
 import com.lightningbid.item.web.dto.response.ItemLikeResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -21,10 +22,13 @@ import java.util.concurrent.CompletableFuture;
 @RestController
 public class ItemLikeController {
 
+    private final ItemLikeService itemLikeService;
+
     private final ItemLikeAsyncService itemLikeAsyncService;
 
     private final Queue<ItemLikeEventDto> likeEventQue;
 
+    // 1. 비동기 API
 //    @PostMapping
     public CompletableFuture<ResponseEntity<CommonResponseDto<ItemLikeResponseDto>>> likeItem(
             @AuthenticationPrincipal CustomOAuth2User user,
@@ -74,7 +78,8 @@ public class ItemLikeController {
          */
     }
 
-    @PostMapping
+    // 2. Spring Event API
+//    @PostMapping
     public ResponseEntity<CommonResponseDto<Void>> upsertLikeItem(
             @AuthenticationPrincipal CustomOAuth2User user,
             @PathVariable Long itemId) {
@@ -87,6 +92,19 @@ public class ItemLikeController {
                         .build()
         );
         itemLikeAsyncService.triggerProcessing();
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                CommonResponseDto.success(HttpStatus.CREATED.value(), "좋아요/좋아요 취소 처리가 완료되었습니다.")
+        );
+    }
+
+    // 3. Kafka 사용 API
+    @PostMapping
+    public ResponseEntity<CommonResponseDto<Void>> upsertLikeItemWithKafka(
+            @AuthenticationPrincipal CustomOAuth2User user,
+            @PathVariable Long itemId) {
+
+        itemLikeService.publishToggleItemLikeEvent(user.getId(), itemId);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 CommonResponseDto.success(HttpStatus.CREATED.value(), "좋아요/좋아요 취소 처리가 완료되었습니다.")
